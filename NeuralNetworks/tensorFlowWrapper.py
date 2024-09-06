@@ -69,7 +69,7 @@ class TensorFlowWrapper:
 												  val_type=self.val_type, print_per_task=print_per_task)
 			self.wanted_labels = self.net.optimize_labels
 		else:
-			self.data_df = pd.DataFrame.from_csv(self.datasets_path + self.dataset_name)
+			self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
 			self.wanted_feats = [x for x in self.data_df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and '_Label' not in x]
 			if self.multilabel:
 				self.wanted_labels = [x for x in self.data_df.columns.values if '_Label' in x and 'tomorrow_' in x and 'Evening' in x and 'Alertness' not in x and 'Energy' not in x]
@@ -101,7 +101,7 @@ class TensorFlowWrapper:
 		#storing the results
 		self.time_sum = 0
 		if cont:
-			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.val_output_prefix + '.csv')
+			self.val_results_df = pd.read_csv(self.results_path + self.val_output_prefix + '.csv')
 			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:

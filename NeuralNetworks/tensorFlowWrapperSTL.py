@@ -52,7 +52,7 @@ class TensorFlowSTLWrapper:
 		self.save_prefix = self.getSavePrefix(dataset_name, target_label, replace=cont)
 
 		self.dataset_name = dataset_name 
-		self.data_df = pd.DataFrame.from_csv(self.datasets_path + self.dataset_name)
+		self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
 		self.wanted_feats = [x for x in self.data_df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and '_Label' not in x]
 		if self.users_as_tasks:
 			self.wanted_labels = [target_label]
@@ -92,7 +92,7 @@ class TensorFlowSTLWrapper:
 		#storing the results
 		self.time_sum = 0
 		if cont:
-			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.save_prefix + '.csv')
+			self.val_results_df = pd.read_csv(self.results_path + self.save_prefix + '.csv')
 			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:

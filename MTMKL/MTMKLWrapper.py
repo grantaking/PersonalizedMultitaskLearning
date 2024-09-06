@@ -123,7 +123,7 @@ class MTMKLWrapper:
 		#storing the results
 		self.time_sum = 0
 		if cont:
-			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.save_prefix + '.csv')
+			self.val_results_df = pd.read_csv(self.results_path + self.save_prefix + '.csv')
 			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:

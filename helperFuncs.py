@@ -471,7 +471,7 @@ def renameAllColsWithPrefix(df,prefix,remove_len=0):
 def combineFilesIntoDf(file_path, filenames, reset_index=False, drop_cols=None):
 	df = None
 	for filename in filenames:
-		fdf = pd.DataFrame.from_csv(file_path + filename)
+		fdf = pd.read_csv(file_path + filename)
 		
 		if reset_index:
 			fdf = fdf.reset_index()
@@ -602,7 +602,7 @@ def tf_bias_variable(shape, name):
 def get_test_predictions_for_df_with_task_column(model_predict_func, csv_path, task_column, tasks, 
 												wanted_label=None, num_feats_expected=None, label_name="", 
 												tasks_are_ints=True):
-	data_df = pd.DataFrame.from_csv(csv_path)
+	data_df = pd.read_csv(csv_path)
 	
 	wanted_feats = [x for x in data_df.columns.values if x != 'user_id' and x != 'timestamp' and 'ppt_id' not in x and x!= 'dataset' and '_Label' not in x and 'Cluster' not in x]
 	if num_feats_expected is not None and len(wanted_feats) != num_feats_expected:
@@ -644,7 +644,7 @@ def get_test_predictions_for_df_with_task_column(model_predict_func, csv_path, t
 
 def get_test_predictions_for_df_with_no_task_column(model_predict_func, csv_path, tasks, 
 													num_feats_expected=None):
-	data_df = pd.DataFrame.from_csv(csv_path)
+	data_df = pd.read_csv(csv_path)
 	
 	wanted_feats = [x for x in data_df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and '_Label' not in x and 'Cluster' not in x]
 	if num_feats_expected is not None and len(wanted_feats) != num_feats_expected:
