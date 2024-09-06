@@ -124,7 +124,7 @@ class TensorFlowSTLWrapper:
 		self.num_settings = len(self.l2_regularizers) * len(self.learning_rates) * len(self.dropout) * len(self.decay) \
 						* len(self.batch_sizes)  * len(self.optimizers) * len(self.train_steps) * len(self.architectures)
 		if True in self.decay and (len(self.decay_steps) > 1 or len(self.decay_rates) > 1):
-			self.num_settings = num_settings * ((len(self.decay_steps) * len(self.decay_rates)) / 2.0) 
+			self.num_settings = self.num_settings * ((len(self.decay_steps) * len(self.decay_rates)) / 2.0) 
 
 	# use something like the following to test only one set of parameters:
 	# wrapper.setParams(l2_regularizers=[1e-4, learning_rates=[.01], dropout=[True], decay=[True], batch_sizes=[50], optimizers=[tf.train.GradientDescentOptimizer])

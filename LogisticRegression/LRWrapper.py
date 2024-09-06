@@ -33,19 +33,20 @@ SAVE_RESULTS_EVERY_X_TESTS = 1
 
 def reload_dependencies():
 	importlib.reload(helper)
-	importlib.reload(lssvm)
+	# importlib.reload(lssvm)
 
 class LRWrapper(STLWrapper):
 	def __init__(self, file_prefix, users_as_tasks=False, cont=False, c_vals=C_VALS, 
 				 penalties=PENALTIES, solver=SOLVER, num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, 
-				 dropbox_path=PATH_TO_DROPBOX, datasets_path='Data/',
+				 #dropbox_path=PATH_TO_DROPBOX,
+				 datasets_path='Data/',
 				 test_csv_filename=None):
 		self.c_vals = c_vals
 		self.penalties = penalties
 		self.solver = solver
 		
 		STLWrapper.__init__(self, file_prefix, users_as_tasks=users_as_tasks, cont=cont, 
-				classifier_name='LR', num_cross_folds=num_cross_folds, dropbox_path=dropbox_path, 
+				classifier_name='LR', num_cross_folds=num_cross_folds, #dropbox_path=dropbox_path, 
 				datasets_path=datasets_path, cant_train_with_one_class=False, 
 				save_results_every_nth=SAVE_RESULTS_EVERY_X_TESTS, test_csv_filename=test_csv_filename)
 

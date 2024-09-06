@@ -20,6 +20,7 @@ import copy
 import operator
 import datetime
 import importlib
+import MTMKL as mtmkl_tf
 from time import time
 
 CODE_PATH = os.path.dirname(os.getcwd())

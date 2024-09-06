@@ -18,6 +18,7 @@ import math
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics.pairwise import rbf_kernel, euclidean_distances, cosine_similarity
+from sklearn.svm import SVC
 import numpy.linalg as LA
 
 import pandas as pd

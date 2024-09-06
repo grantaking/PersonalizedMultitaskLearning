@@ -7,6 +7,8 @@ import pickle
 from scipy import stats
 from sklearn.metrics import roc_auc_score, f1_score, precision_score, recall_score
 import ast
+import math
+import matplotlib.pyplot as plt
 import tensorflow as tf 
 
 NAN_FILL_VALUE = 0

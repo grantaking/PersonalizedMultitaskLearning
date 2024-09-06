@@ -37,14 +37,14 @@ def reload_dependencies():
 
 class LSSVMWrapper(STLWrapper):
 	def __init__(self, file_prefix, users_as_tasks=False, cont=False, c_vals=C_VALS, beta_vals=BETA_VALS, 
-				 kernels=KERNELS, num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, dropbox_path=PATH_TO_DROPBOX, 
+				 kernels=KERNELS, num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, # dropbox_path=PATH_TO_DROPBOX, 
 				 datasets_path='Data/', test_csv_filename=None):
 		self.c_vals = c_vals
 		self.beta_vals=beta_vals
 		self.kernels = kernels
 		
 		STLWrapper.__init__(self, file_prefix, users_as_tasks=users_as_tasks, cont=cont, 
-				classifier_name='LSSVM', num_cross_folds=num_cross_folds, dropbox_path=dropbox_path, 
+				classifier_name='LSSVM', num_cross_folds=num_cross_folds, # dropbox_path=dropbox_path, 
 				datasets_path=datasets_path, cant_train_with_one_class=True, 
 				save_results_every_nth=SAVE_RESULTS_EVERY_X_TESTS, test_csv_filename=test_csv_filename)
 

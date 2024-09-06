@@ -22,7 +22,7 @@ import time
 import copy
 import argparse
 import helperFuncs as helper
-from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
