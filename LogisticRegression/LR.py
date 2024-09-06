@@ -7,13 +7,14 @@ from sklearn.metrics import roc_curve, auc
 import sys
 import os
 import pickle
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
 import helperFuncs as helper
 
 def reloadHelper():
-	reload(helper)
+	importlib.reload(helper)
 
 # http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 class LR:

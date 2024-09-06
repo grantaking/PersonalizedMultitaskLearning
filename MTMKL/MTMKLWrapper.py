@@ -19,6 +19,7 @@ import pickle
 import copy
 import operator
 import datetime
+import importlib
 from time import time
 
 CODE_PATH = os.path.dirname(os.getcwd())
@@ -46,8 +47,8 @@ SAVE_RESULTS_EVERY_X_TESTS = 1
 
 
 def reloadFiles():
-	reload(helper)
-	reload(mtmkl)
+	importlib.reload(helper)
+	importlib.reload(mtmkl)
 	mtmkl.reloadFiles()
 
 
@@ -80,15 +81,15 @@ class MTMKLWrapper:
 			self.val_tasks = helper.loadPickledTaskList(datasets_path, file_prefix, "Val", fix_y=True)
 
 		# print dataset sizes
-		print "Num train points:", sum([len(t['Y']) for t in self.train_tasks])
+		print("Num train points:", sum([len(t['Y']) for t in self.train_tasks]))
 		if self.val_type != 'cross':
-			print "Num val points:", sum([len(t['Y']) for t in self.val_tasks])
-		print "Num test points:", sum([len(t['Y']) for t in self.test_tasks])
+			print("Num val points:", sum([len(t['Y']) for t in self.val_tasks]))
+		print("Num test points:", sum([len(t['Y']) for t in self.test_tasks]))
 
-   		if self.val_type != 'cross':
-   			self.initializeMTMKLModel(self.train_tasks)
+		if self.val_type != 'cross':
+			self.initializeMTMKLModel(self.train_tasks)
 		else:
-			self.classifier = None	
+			self.classifier = None
 
 		self.n_feats = helper.calculateNumFeatsInTaskList(self.test_tasks)
 		self.n_tasks = len(self.test_tasks)
@@ -109,7 +110,7 @@ class MTMKLWrapper:
 		self.print_iters = print_iters
 
 		if test_run:
-			print "This is only a testing run. Using cheap settings to make it faster"
+			print("This is only a testing run. Using cheap settings to make it faster")
 			self.c_vals = [100]
 			self.beta_vals = [.01]
 			self.kernels = ['linear']
@@ -123,7 +124,7 @@ class MTMKLWrapper:
 		self.time_sum = 0
 		if cont:
 			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.save_prefix + '.csv')
-			print '\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows"
+			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:
 			self.val_results_df = pd.DataFrame()
@@ -179,7 +180,7 @@ class MTMKLWrapper:
 										(self.val_results_df['kernel']== kernel) & \
 										(self.val_results_df['v']== v) & \
 										(self.val_results_df['regularizer']== regularizer)]) > 0:
-				print "setting already tested"
+				print("setting already tested")
 				return True
 			else:
 				return False
@@ -189,7 +190,7 @@ class MTMKLWrapper:
 										(self.val_results_df['kernel']== kernel) & \
 										(self.val_results_df['v']== v) & \
 										(self.val_results_df['regularizer']== regularizer)]) > 0:
-				print "setting already tested"
+				print("setting already tested")
 				return True
 			else:
 				return False
@@ -279,7 +280,7 @@ class MTMKLWrapper:
 					per_task_f1[t].append(t_f1)
 					per_task_precision[t].append(t_precision)
 					per_task_recall[t].append(t_recall)
-					if print_per_fold: print "Fold", f, "Task", val_tasks[t]['Name'], "acc", t_acc, "auc", t_auc, "f1", t_f1, "precision",t_precision,"recall",t_recall
+					if print_per_fold: print("Fold", f, "Task", val_tasks[t]['Name'], "acc", t_acc, "auc", t_auc, "f1", t_f1, "precision",t_precision,"recall",t_recall)
 
 				fold_preds.extend(preds)
 				fold_true_y.extend(true_y)
@@ -291,10 +292,10 @@ class MTMKLWrapper:
 			all_f1.append(f1)
 			all_precision.append(precision)
 			all_recall.append(recall)
-			if print_per_fold: print "Fold", f, "acc", acc, "auc", auc, "f1", f1, "precision",precision,"recall",recall
+			if print_per_fold: print("Fold", f, "acc", acc, "auc", auc, "f1", f1, "precision",precision,"recall",recall)
 
-		print "accs for all folds", all_acc
-		print "aucs for all folds", all_auc
+		print("accs for all folds", all_acc)
+		print("aucs for all folds", all_auc)
 		
 		# Add results to the dictionary
 		results_dict['val_acc'] = np.nanmean(all_acc)
@@ -323,7 +324,7 @@ class MTMKLWrapper:
 		t0 = time()
 		
 		results_dict = {'C':C, 'beta': beta, 'kernel':kernel, 'v':v, 'regularizer':regularizer}
-		print results_dict
+		print(results_dict)
 		
 		if self.val_type == 'cross':
 			results_dict = self.getCrossValidationResults(results_dict, C, beta, kernel, v, regularizer)
@@ -332,10 +333,10 @@ class MTMKLWrapper:
 		
 		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
 		
-		print "\n", self.val_results_df.tail(n=1)
+		print("\n", self.val_results_df.tail(n=1))
 		t1 = time()
 		this_time = t1 - t0
-		print "It took", this_time, "seconds to obtain this result"
+		print("It took", this_time, "seconds to obtain this result")
 
 		self.time_sum = self.time_sum + this_time
 
@@ -355,14 +356,14 @@ class MTMKLWrapper:
 		mins = (total_secs_remaining % 3600) / 60
 		secs = (total_secs_remaining % 3600) % 60
 
-		print "\n", num_done, "settings processed so far,", num_remaining, "left to go"
-		print "Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs"
+		print("\n", num_done, "settings processed so far,", num_remaining, "left to go")
+		print("Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs")
 
 	def sweepAllParameters(self):
-		print "\nSweeping all parameters!"
+		print("\nSweeping all parameters!")
 		
 		self.calcNumSettingsDesired()
-		print "\nYou have chosen to test a total of", self.num_settings, "settings"
+		print("\nYou have chosen to test a total of", self.num_settings, "settings")
 		sys.stdout.flush()
 
 		#sweep all possible combinations of parameters
@@ -397,9 +398,9 @@ class MTMKLWrapper:
 			opt_word = "maximized"
 		best_idx = results.index(best_result)
 
-		print "BEST SETTING!"
-		print "Settings which", opt_word, "the", criteria, "were:"
-		print self.val_results_df.iloc[best_idx]
+		print("BEST SETTING!")
+		print("Settings which", opt_word, "the", criteria, "were:")
+		print(self.val_results_df.iloc[best_idx])
 
 		if save_final_results:
 			self.getFinalResultsAndSave(self.val_results_df.iloc[best_idx])
@@ -407,13 +408,13 @@ class MTMKLWrapper:
 			return self.val_results_df.iloc[best_idx]
 
 	def getFinalResultsAndSave(self, results_dict):
-		print "\nRetraining on full training data with the best settings..."
+		print("\nRetraining on full training data with the best settings...")
 		self.drop20=False
 		self.initializeAndTrainMTMKL(self.train_tasks, results_dict['C'], results_dict['beta'], 
 									results_dict['kernel'], results_dict['v'], results_dict['regularizer'], 
 									verbose=True)
 		
-		print "\nEvaluating results on held-out test set!! ..."
+		print("\nEvaluating results on held-out test set!! ...")
 		all_preds = []
 		all_true_y = []
 		per_task_accs = [np.nan] * self.n_tasks
@@ -426,7 +427,7 @@ class MTMKLWrapper:
 			true_y = list(self.test_tasks[t]['Y'].flatten())
 
 			if len(preds)==0 or len(true_y) == 0:
-				print "no y for task", t, "... skipping"
+				print("no y for task", t, "... skipping")
 				continue
 				
 			all_preds.extend(preds)
@@ -440,31 +441,31 @@ class MTMKLWrapper:
 			per_task_precision[t] = t_precision
 			per_task_recall[t] = t_recall
 
-		print "\nPlotting cool stuff about the final model..."
+		print("\nPlotting cool stuff about the final model...")
 		self.saveImagePlot(self.classifier.eta, 'Etas')
 		pd.DataFrame(self.classifier.eta).to_csv(self.etas_path + self.save_prefix + "-etas.csv")
 
-		print "\tHELD OUT TEST METRICS COMPUTED BY APPENDING ALL PREDS"
+		print("\tHELD OUT TEST METRICS COMPUTED BY APPENDING ALL PREDS")
 		acc, auc, f1, precision, recall = helper.computeAllMetricsForPreds(all_preds, all_true_y)
-		print '\t\tAcc:', acc, 'AUC:', auc, 'F1:', f1, 'Precision:', precision, 'Recall:', recall
+		print('\t\tAcc:', acc, 'AUC:', auc, 'F1:', f1, 'Precision:', precision, 'Recall:', recall)
 
-		print "\n\tHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS"
+		print("\n\tHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS")
 		avg_acc = np.nanmean(per_task_accs)
 		avg_auc = np.nanmean(per_task_aucs)
 		avg_f1 = np.nanmean(per_task_f1)
 		avg_precision = np.nanmean(per_task_precision)
 		avg_recall = np.nanmean(per_task_recall)
-		print '\t\tAcc:', avg_acc, 'AUC:', avg_auc, 'F1:', avg_f1, 'Precision:', avg_precision, 'Recall:', avg_recall
+		print('\t\tAcc:', avg_acc, 'AUC:', avg_auc, 'F1:', avg_f1, 'Precision:', avg_precision, 'Recall:', avg_recall)
 
-		print "\n\tHELD OUT TEST METRICS COMPUTED FOR EACH TASK"
+		print("\n\tHELD OUT TEST METRICS COMPUTED FOR EACH TASK")
 		if not self.users_as_tasks:
 			for t in range(self.n_tasks):
 				task_name = self.test_tasks[t]['Name']
 				task_name=helper.getFriendlyLabelName(task_name)
-				print "\t\t", task_name, "- Acc:", per_task_accs[t], "AUC:", per_task_aucs[t], 'F1:', per_task_f1[t], 'Precision:', per_task_precision[t], 'Recall:', per_task_recall[t]
+				print("\t\t", task_name, "- Acc:", per_task_accs[t], "AUC:", per_task_aucs[t], 'F1:', per_task_f1[t], 'Precision:', per_task_precision[t], 'Recall:', per_task_recall[t])
 
 		if self.test_csv_filename is not None:
-			print "\tSAVING HELD OUT PREDICITONS"
+			print("\tSAVING HELD OUT PREDICITONS")
 			if 'Big5GenderKMeansCluster' in self.file_prefix:
 				task_column = 'Big5GenderKMeansCluster'
 				tasks_are_ints = True
@@ -478,11 +479,11 @@ class MTMKLWrapper:
 				predictions_df = helper.get_test_predictions_for_df_with_no_task_column(self.classifier.predict_01, 
 					self.test_csv_filename, self.test_tasks, num_feats_expected=np.shape(self.test_tasks[0]['X'])[1])
 			else:
-				print "Error! Cannot determine what type of model you are training and therefore cannot save predictions."
+				print("Error! Cannot determine what type of model you are training and therefore cannot save predictions.")
 				return
 			predictions_df.to_csv(self.results_path + "Preds-" + self.save_prefix + '.csv')
 		else:
-			print "Uh oh, the test csv filename was not set, can't save test preds"
+			print("Uh oh, the test csv filename was not set, can't save test preds")
 
 	def saveImagePlot(self, matrix, name):
 		plt.figure()
@@ -493,61 +494,61 @@ class MTMKLWrapper:
 	
 
 if __name__ == "__main__":
-	print "MTMKL MODEL SELECTION"
-	print "\tThis code will sweep a set of parameters to find the ideal settings for MTMLK for a single dataset"
+	print("MTMKL MODEL SELECTION")
+	print("\tThis code will sweep a set of parameters to find the ideal settings for MTMLK for a single dataset")
 
 	if len(sys.argv) < 3:
-		print "Error: usage is python MTMKLWrapper.py <data file> <test type> <continue>"
-		print "\t<file prefix>: e.g. datasetTaskList-Discard-Future-Group_ - program will look in the following directory for this file", DEFAULT_DATASETS_PATH
-		print "\t<test type>: type 'users' for users as tasks, 'wellbeing' for wellbeing measures as tasks, or 'clusters' for user clusters as tasks"
-		print "\t<continue>: optional. If 'True', the wrapper will pick up from where it left off by loading a previous validation results file"
-		print "\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on"
+		print ("Error: usage is python MTMKLWrapper.py <data file> <test type> <continue>")
+		print ("\t<file prefix>: e.g. datasetTaskList-Discard-Future-Group_ - program will look in the following directory for this file", DEFAULT_DATASETS_PATH)
+		print ("\t<test type>: type 'users' for users as tasks, 'wellbeing' for wellbeing measures as tasks, or 'clusters' for user clusters as tasks")
+		print("\t<continue>: optional. If 'True', the wrapper will pick up from where it left off by loading a previous validation results file")
+		print("\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on")
 		sys.exit()
 	filename= sys.argv[1] #get data file from command line argument
-	print "\nLoading dataset", DEFAULT_DATASETS_PATH + filename
-	print ""
+	print("\nLoading dataset", DEFAULT_DATASETS_PATH + filename)
+	print("")
 
 	if sys.argv[2] == 'users':
 		users_as_tasks = True
 		cluster_users = False
-		print "Okay, treating users as tasks. Will not print per-task results"
+		print("Okay, treating users as tasks. Will not print per-task results")
 	elif sys.argv[2] == 'wellbeing':
 		users_as_tasks = False
 		cluster_users = False
-		print "Okay, treating wellbeing measures as tasks. Will save and print per-task results"
+		print("Okay, treating wellbeing measures as tasks. Will save and print per-task results")
 	elif sys.argv[2] == 'clusters':
 		users_as_tasks = False
 		cluster_users = True
-		print "Okay, treating user clusters as tasks. Will save and print per-task results and optimize for accuracy over all clusters."
+		print("Okay, treating user clusters as tasks. Will save and print per-task results and optimize for accuracy over all clusters.")
 		
 	if len(sys.argv) >= 4 and sys.argv[3] == 'True':
 		cont = True
-		print "Okay, will continue from a previously saved validation results file for this problem"
+		print("Okay, will continue from a previously saved validation results file for this problem")
 	else:
 		cont = False
-	print ""
+	print("")
 
 	if len(sys.argv) >= 5:
 		csv_test_file = sys.argv[4]
-		print "Okay, will get final test results on file", csv_test_file
-		print ""
+		print("Okay, will get final test results on file", csv_test_file)
+		print("")
 	else:
 		csv_test_file = None
 
 	if USE_TENSORFLOW:
-		print "\nWill use the TENSORFLOW version of the code\n"
+		print("\nWill use the TENSORFLOW version of the code\n")
 
 	wrapper = MTMKLWrapper(filename, users_as_tasks=users_as_tasks, user_clusters=cluster_users, cont=cont,
 						   test_csv_filename=csv_test_file)
 	
-	print "\nThe following parameter settings will be tested:"
-	print "\tCs:            \t", wrapper.c_vals
-	print "\tbetas:         \t", wrapper.beta_vals
-	print "\tkernels:       \t", wrapper.kernels
-	print "\tvs:            \t", wrapper.v_vals
-	print "\tregularizers:  \t", wrapper.regularizers
+	print("\nThe following parameter settings will be tested:")
+	print("\tCs:            \t", wrapper.c_vals)
+	print("\tbetas:         \t", wrapper.beta_vals)
+	print("\tkernels:       \t", wrapper.kernels)
+	print("\tvs:            \t", wrapper.v_vals)
+	print("\tregularizers:  \t", wrapper.regularizers)
 
-	print "\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv'
-	print "\nThe validation and testing figures will be saved in:", wrapper.figures_path + wrapper.save_prefix
+	print("\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv')
+	print("\nThe validation and testing figures will be saved in:", wrapper.figures_path + wrapper.save_prefix)
 
 	wrapper.run()

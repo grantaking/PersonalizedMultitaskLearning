@@ -5,6 +5,7 @@ import sys
 import os
 import pickle
 from time import time
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
@@ -22,9 +23,9 @@ import tensorFlowNetworkMultiTask as mtltf
 import helperFuncs as helper
 
 def reloadFiles():
-	reload(tfnet)
-	reload(mtltf)
-	reload(helper)
+	importlib.reload(tfnet)
+	importlib.reload(mtltf)
+	importlib.reload(helper)
 	tfnet.reloadHelper()
 	mtltf.reloadFiles()
 
@@ -101,7 +102,7 @@ class TensorFlowWrapper:
 		self.time_sum = 0
 		if cont:
 			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.val_output_prefix + '.csv')
-			print '\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows"
+			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:
 			self.val_results_df = pd.DataFrame()
@@ -170,13 +171,13 @@ class TensorFlowWrapper:
 									(self.val_results_df['decay_rate']== drate) & \
 									(self.val_results_df['batch_size']== bsize) & \
 									(self.val_results_df['optimizer']== str(opt))]) > 0:
-			print "setting already tested"
+			print("setting already tested")
 			return True
 		else:
 			return False
 
 	def testOneSetting(self, hidden_layers, l2_beta, lrate, dropout, decay, dsteps, drate, bsize, opt, tsteps, num_settings):
-		print "Testing setting with layers", hidden_layers, "beta", l2_beta, "lrate", lrate, "dropout", dropout, "decay", decay, "dsteps", dsteps, "drate", drate, "bsize", bsize, "opt", opt, "tsteps", tsteps
+		print("Testing setting with layers", hidden_layers, "beta", l2_beta, "lrate", lrate, "dropout", dropout, "decay", decay, "dsteps", dsteps, "drate", drate, "bsize", bsize, "opt", opt, "tsteps", tsteps)
 		if self.cont:
 			if self.settingAlreadyDone(hidden_layers, l2_beta, lrate, dropout, decay, dsteps, drate, bsize, opt, tsteps):
 				return
@@ -210,10 +211,10 @@ class TensorFlowWrapper:
 				results_dict[friendly_label + '_recall'] = self.net.training_val_results_per_task['recall'][label][-1]
 		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
 		
-		print self.val_results_df.tail(n=1)
+		print(self.val_results_df.tail(n=1))
 		t1 = time()
 		this_time = t1 - t0
-		print "It took", this_time, "seconds to obtain this result"
+		print("It took", this_time, "seconds to obtain this result")
 
 		self.time_sum = self.time_sum + this_time
 
@@ -232,8 +233,8 @@ class TensorFlowWrapper:
 		mins = (total_secs_remaining % 3600) / 60
 		secs = (total_secs_remaining % 3600) % 60
 
-		print "\n", num_done, "settings processed so far,", num_remaining, "left to go"
-		print "Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs"
+		print("\n", num_done, "settings processed so far,", num_remaining, "left to go")
+		print("Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs")
 
 	def calcNumSettingsPerStructure(self):
 		num_settings = len(self.l2_regularizers) * len(self.learning_rates) * len(self.dropout) * len(self.decay) \
@@ -243,7 +244,7 @@ class TensorFlowWrapper:
 		return num_settings
 
 	def sweepParameters(self, hidden_layers, num_settings):
-		print "\nSweeping all parameters for structure:", hidden_layers
+		print("\nSweeping all parameters for structure:", hidden_layers)
 	
 		#sweep all possible combinations of parameters
 		for l2_beta in self.l2_regularizers:
@@ -266,8 +267,8 @@ class TensorFlowWrapper:
 		num_settings = self.calcNumSettingsPerStructure()
 		num_settings_total = num_settings * len(self.architectures)
 
-		print "\nYou have chosen to test", num_settings, "settings for each of", len(self.architectures), "architectures"
-		print "This is a total of", num_settings_total, "tests."
+		print("\nYou have chosen to test", num_settings, "settings for each of", len(self.architectures), "architectures")
+		print("This is a total of", num_settings_total, "tests.")
 		for hidden_layers in self.architectures:
 			self.sweepParameters(hidden_layers,num_settings_total)
 
@@ -277,9 +278,9 @@ class TensorFlowWrapper:
 		max_idx = accuracies.index(max_acc)
 		best_setting = self.val_results_df.iloc[max_idx]
 
-		print "BEST SETTING!"
-		print "The highest", optimize_for, "of", max_acc, "was found with the following settings:"
-		print best_setting
+		print("BEST SETTING!")
+		print("The highest", optimize_for, "of", max_acc, "was found with the following settings:")
+		print(best_setting)
 
 		best_setting = helper.fixSettingDictLoadedFromResultsDf(best_setting)
 
@@ -289,7 +290,7 @@ class TensorFlowWrapper:
 			return best_setting
 
 	def retrainAndPlot(self, setting_dict):
-		print "\nRETRAINING WITH THE BEST SETTINGS:"
+		print("\nRETRAINING WITH THE BEST SETTINGS:")
 
 		self.net.verbose = True
 		self.net.setParams(l2_beta=setting_dict['l2_beta'], initial_learning_rate=setting_dict['learning_rate'], decay=setting_dict['decay'], 
@@ -305,30 +306,30 @@ class TensorFlowWrapper:
 				friendly_label = helper.getFriendlyLabelName(label)
 				self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '-' + friendly_label + '.eps', label=label)
 				self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '-' + friendly_label + '.png', label=label)
-				print "Final validation results for", friendly_label,"... Acc:", \
-						self.net.training_val_results_per_task['acc'][label][-1], "Auc:", self.net.training_val_results_per_task['auc'][label][-1]
+				print("Final validation results for", friendly_label,"... Acc:", \
+						self.net.training_val_results_per_task['acc'][label][-1], "Auc:", self.net.training_val_results_per_task['auc'][label][-1])
 		elif self.print_per_task:
 			for label in self.wanted_labels:
 				friendly_label = helper.getFriendlyLabelName(label)
 				self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '-' + friendly_label + '.eps', label=label)
 				self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '-' + friendly_label + '.png', label=label)
-				print "Final validation results for", friendly_label,"... Acc:", \
-					self.net.training_val_results_per_task['acc'][label][-1], "Auc:", self.net.training_val_results_per_task['auc'][label][-1]
+				print("Final validation results for", friendly_label,"... Acc:", \
+					self.net.training_val_results_per_task['acc'][label][-1], "Auc:", self.net.training_val_results_per_task['auc'][label][-1])
 		else:
 			self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '.eps')
 			self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '.png')
-			print "Final AUC:", self.net.training_val_results['auc'][-1]
+			print("Final AUC:", self.net.training_val_results['auc'][-1])
 
 		if self.test_csv_filename is not None:
 			if self.multitask:
 				task_column = None
 				if 'Cluster' in self.dataset_name:
-					print "Guessing the task column is Big5GenderKMeansCluster - if this is incorrect expect errors"
+					print("Guessing the task column is Big5GenderKMeansCluster - if this is incorrect expect errors")
 					task_column = 'Big5GenderKMeansCluster'
 					tasks_are_ints = True
 				
 				if 'User' in self.dataset_name:
-					print "Guessing the task column is user_id - if this is incorrect expect errors"
+					print("Guessing the task column is user_id - if this is incorrect expect errors")
 					task_column = 'user_id'
 					tasks_are_ints = False
 				
@@ -345,12 +346,12 @@ class TensorFlowWrapper:
 																	num_feats_expected=np.shape(self.net.test_tasks[0]['X'])[1])
 			else:
 				test_preds_df = self.net.get_preds_for_df()
-			print "Got a test preds df! Saving it to:", self.results_path + "Preds-" + self.val_output_prefix + '.csv'
+			print("Got a test preds df! Saving it to:", self.results_path + "Preds-" + self.val_output_prefix + '.csv')
 			test_preds_df.to_csv(self.results_path + 'Preds-' + self.val_output_prefix + '.csv')
 		else:
-			print "Uh oh, the test csv filename was not set, can't save test preds"
+			print("Uh oh, the test csv filename was not set, can't save test preds")
 
-		print "Saving a copy of the final model!"
+		print("Saving a copy of the final model!")
 		self.net.save_model(self.val_output_prefix, self.results_path)
 		
 
@@ -359,37 +360,37 @@ class TensorFlowWrapper:
 		self.findBestSetting()
 
 if __name__ == "__main__":
-	print "TENSOR FLOW MODEL SELECTION"
-	print "\tThis code will sweep a set of network architectures and parameters to find the ideal settings for a single dataset"
+	print("TENSOR FLOW MODEL SELECTION")
+	print("\tThis code will sweep a set of network architectures and parameters to find the ideal settings for a single dataset")
 
 	if len(sys.argv) < 4:
-		print "Error: usage is python tensorFlowWrapper.py <data file> <classification type> <multitasking over> <continue>"
-		print "\t<data file>: e.g. dataset-Simple-Group.csv or datasetTaskList-Discard40-Future-Personal_ ... Program will look in the following directory for this file", DEFAULT_DATASETS_PATH
-		print "\t<classification type>:"
-		print "\t\tFor single task learning, enter the name of the label you would like classify on. E.g. Group_Happiness_Evening_Label"
-		print "\t\tFor multi task learning, in which the same net learns several tasks (like several wellbeing measures) enter: multilabel"
-		print "\t\tFor multi task learning, in which each task gets its own piece of the network, but the first layers are shared (like users as tasks) enter: multitask"
-		print "\t<multitasking over> For wellbeing-ask-tasks use 'wellbeing', for users-as-tasks use 'users'"
-		print "\t<continue>: optional. If 'True', the neural net will pick up from where it left off by loading a previous validation results file"
-		print "\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on"
+		print("Error: usage is python tensorFlowWrapper.py <data file> <classification type> <multitasking over> <continue>")
+		print("\t<data file>: e.g. dataset-Simple-Group.csv or datasetTaskList-Discard40-Future-Personal_ ... Program will look in the following directory for this file", DEFAULT_DATASETS_PATH)
+		print("\t<classification type>:")
+		print("\t\tFor single task learning, enter the name of the label you would like classify on. E.g. Group_Happiness_Evening_Label")
+		print("\t\tFor multi task learning, in which the same net learns several tasks (like several wellbeing measures) enter: multilabel")
+		print("\t\tFor multi task learning, in which each task gets its own piece of the network, but the first layers are shared (like users as tasks) enter: multitask")
+		print("\t<multitasking over> For wellbeing-ask-tasks use 'wellbeing', for users-as-tasks use 'users'")
+		print("\t<continue>: optional. If 'True', the neural net will pick up from where it left off by loading a previous validation results file")
+		print("\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on")
 		sys.exit()
 	filename= sys.argv[1] #get data file from command line argument
-	print "\nLoading dataset", DEFAULT_DATASETS_PATH + filename
-	print ""
+	print("\nLoading dataset", DEFAULT_DATASETS_PATH + filename)
+	print("")
 
 	multilabel = False
 	multitask = False
 	target_label = None
 	if sys.argv[2] == 'multilabel':
 		multilabel = True
-		print "Performing multi-task classification, in which the same net is shared by all tasks"
-		print "Optimizing for accuracy on tomorrow evening"
+		print("Performing multi-task classification, in which the same net is shared by all tasks")
+		print("Optimizing for accuracy on tomorrow evening")
 	elif sys.argv[2] == 'multitask':
 		multitask = True
-		print "Performing multi-task classification, in which each task gets it's own private final hidden layer"
+		print("Performing multi-task classification, in which each task gets it's own private final hidden layer")
 	else:
 		target_label = sys.argv[2]
-		print "Performing single-task classification, classifying on", target_label
+		print("Performing single-task classification, classifying on", target_label)
 
 	if sys.argv[3] == 'wellbeing':
 		print_per_task = True
@@ -398,36 +399,36 @@ if __name__ == "__main__":
 
 	if len(sys.argv) >= 5 and sys.argv[4] == 'True':
 		cont = True
-		print "Okay, will continue from a previously saved validation results file for this problem"
+		print("Okay, will continue from a previously saved validation results file for this problem")
 	else:
 		cont = False
-	print ""
+	print("")
 
 	if len(sys.argv) >= 6:
 		csv_test_file = sys.argv[5]
-		print "Okay, will get final test results on file", csv_test_file
-		print ""
+		print("Okay, will get final test results on file", csv_test_file)
+		print("")
 	else:
 		csv_test_file = None
 
 	wrapper = TensorFlowWrapper(filename, target_label=target_label, multilabel=multilabel, multitask=multitask, 
 							    print_per_task=print_per_task, cont=cont, test_csv_filename=csv_test_file)
 	
-	print "\nThe following parameter settings will be tested:"
-	print "\tl2_regularizers:  \t", wrapper.l2_regularizers
-	print "\tlearning_rates:   \t", wrapper.learning_rates
-	print "\tdropout:          \t", wrapper.dropout
-	print "\tdecay:            \t", wrapper.decay
-	print "\tdecay_steps:      \t", wrapper.decay_steps
-	print "\tdecay_rates:      \t", wrapper.decay_rates
-	print "\tbatch_sizes:      \t", wrapper.batch_sizes
-	print "\toptimizers:       \t", wrapper.optimizers
-	print "\ttrain_steps:      \t", wrapper.train_steps
+	print("\nThe following parameter settings will be tested:")
+	print("\tl2_regularizers:  \t", wrapper.l2_regularizers)
+	print("\tlearning_rates:   \t", wrapper.learning_rates)
+	print("\tdropout:          \t", wrapper.dropout)
+	print("\tdecay:            \t", wrapper.decay)
+	print("\tdecay_steps:      \t", wrapper.decay_steps)
+	print("\tdecay_rates:      \t", wrapper.decay_rates)
+	print("\tbatch_sizes:      \t", wrapper.batch_sizes)
+	print("\toptimizers:       \t", wrapper.optimizers)
+	print("\ttrain_steps:      \t", wrapper.train_steps)
 
-	print "\nThe following network structures will be tested:"
-	print "\t", wrapper.architectures
+	print("\nThe following network structures will be tested:")
+	print("\t", wrapper.architectures)
 
-	print "\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.val_output_prefix + '.csv'
-	print "\nThe validation accuracy figures will be saved in:", wrapper.figures_path + wrapper.val_output_prefix + '.eps'
+	print("\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.val_output_prefix + '.csv')
+	print("\nThe validation accuracy figures will be saved in:", wrapper.figures_path + wrapper.val_output_prefix + '.eps')
 
 	wrapper.run()

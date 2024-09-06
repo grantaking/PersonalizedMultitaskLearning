@@ -9,6 +9,7 @@ import os
 import copy
 from time import time
 from sklearn.metrics.pairwise import rbf_kernel
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
@@ -31,8 +32,8 @@ DEFAULT_NUM_CROSS_FOLDS = 5
 SAVE_RESULTS_EVERY_X_TESTS = 1
 
 def reload_dependencies():
-	reload(helper)
-	reload(lssvm)
+	importlib.reload(helper)
+	importlib.reload(lssvm)
 
 class LSSVMWrapper(STLWrapper):
 	def __init__(self, file_prefix, users_as_tasks=False, cont=False, c_vals=C_VALS, beta_vals=BETA_VALS, 
@@ -72,7 +73,7 @@ class LSSVMWrapper(STLWrapper):
 	
 	def predict_task(self, X, t):
 		if self.models[t] is None:
-			print "ERROR! No model has been trained!"
+			print("ERROR! No model has been trained!")
 			
 		preds = self.models[t].predict(X)
 		return (preds + 1.0) / 2
@@ -110,51 +111,51 @@ class LSSVMWrapper(STLWrapper):
 			i += 1
 	
 if __name__ == "__main__":
-	print "LSSVM MODEL SELECTION"
-	print "\tThis code will sweep a set of parameters to find the ideal settings for LS SVM for a single dataset"
+	print("LSSVM MODEL SELECTION")
+	print("\tThis code will sweep a set of parameters to find the ideal settings for LS SVM for a single dataset")
 
 	if len(sys.argv) < 3:
-		print "Error: usage is python LSSVMWrapper.py <file prefix> <users as tasks> <continue>"
-		print "\t<file prefix>: e.g. datasetTaskList-Discard-Future-Group_ - program will look in the following directory for this file", DEFAULT_DATASETS_PATH
-		print "\t<users as tasks>: type 'users' for users as tasks, or 'wellbeing' for wellbeing measures as tasks"
-		print "\t<continue>: optional. If 'True', the wrapper will pick up from where it left off by loading a previous validation results file"
-		print "\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on"
+		print("Error: usage is python LSSVMWrapper.py <file prefix> <users as tasks> <continue>")
+		print("\t<file prefix>: e.g. datasetTaskList-Discard-Future-Group_ - program will look in the following directory for this file", DEFAULT_DATASETS_PATH)
+		print("\t<users as tasks>: type 'users' for users as tasks, or 'wellbeing' for wellbeing measures as tasks")
+		print("\t<continue>: optional. If 'True', the wrapper will pick up from where it left off by loading a previous validation results file")
+		print("\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on")
 		sys.exit()
 	file_prefix= sys.argv[1] #get data file from command line argument
-	print "\nLoading dataset", DEFAULT_DATASETS_PATH + file_prefix
-	print ""
+	print("\nLoading dataset", DEFAULT_DATASETS_PATH + file_prefix)
+	print("")
 
 	if sys.argv[2] == 'users':
 		users_as_tasks = True
-		print "Okay, treating users as tasks. Will not print per-task results"
+		print("Okay, treating users as tasks. Will not print per-task results")
 	else:
 		users_as_tasks = False
-		print "Okay, treating wellbeing measures as tasks. Will save and print per-task results"
+		print("Okay, treating wellbeing measures as tasks. Will save and print per-task results")
 
 	if len(sys.argv) >= 4 and sys.argv[3] == 'True':
 		cont = True
-		print "Okay, will continue from a previously saved validation results file for this problem"
+		print("Okay, will continue from a previously saved validation results file for this problem")
 	else:
 		cont = False
-	print ""
+	print("")
 
 	if len(sys.argv) >= 5:
 		csv_test_file = sys.argv[4]
-		print "Okay, will get final test results on file", csv_test_file
-		print ""
+		print("Okay, will get final test results on file", csv_test_file)
+		print("")
 	else:
 		csv_test_file = None
 
 	wrapper = LSSVMWrapper(file_prefix, users_as_tasks=users_as_tasks, cont=cont, 
 						   test_csv_filename=csv_test_file)
 	
-	print "\nThe following parameter settings will be tested:"
-	print "\tC_VALS:  	\t", wrapper.c_vals
-	print "\tBETAS:   	\t", wrapper.beta_vals
-	print "\tKERNELS:   \t", wrapper.kernels
+	print("\nThe following parameter settings will be tested:")
+	print("\tC_VALS:  	\t", wrapper.c_vals)
+	print("\tBETAS:   	\t", wrapper.beta_vals)
+	print("\tKERNELS:   \t", wrapper.kernels)
 
-	print "\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv'
-	print "\nThe validation and testing figures will be saved in:", wrapper.figures_path + wrapper.save_prefix
+	print("\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv')
+	print("\nThe validation and testing figures will be saved in:", wrapper.figures_path + wrapper.save_prefix)
 
 	wrapper.run()
 

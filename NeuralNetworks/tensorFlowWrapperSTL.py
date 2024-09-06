@@ -8,6 +8,7 @@ import os
 import pickle
 import copy
 from time import time
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
@@ -24,8 +25,8 @@ DEFAULT_NUM_CROSS_FOLDS = 5
 SAVE_RESULTS_EVERY_X_TESTS = 1
 
 def reloadFiles():
-	reload(helper)
-	reload(tfnet)
+	importlib.reload(helper)
+	importlib.reload(tfnet)
 	tfnet.reloadHelper()
 
 class TensorFlowSTLWrapper:
@@ -74,7 +75,7 @@ class TensorFlowSTLWrapper:
 
 		self.test_run = test_run
 		if test_run:
-			print "This is only a testing run. Using cheap settings to make it faster"
+			print("This is only a testing run. Using cheap settings to make it faster")
 			self.l2_regularizers = [1e-2]
 			self.dropout = [True]
 			self.decay = [True]
@@ -92,7 +93,7 @@ class TensorFlowSTLWrapper:
 		self.time_sum = 0
 		if cont:
 			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.save_prefix + '.csv')
-			print '\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows"
+			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:
 			self.val_results_df = pd.DataFrame()
@@ -142,7 +143,7 @@ class TensorFlowSTLWrapper:
 
 	def settingAlreadyDone(self, task):
 		if len(self.val_results_df[(self.val_results_df['task_name']== task)]) > 0:
-			print "setting already tested"
+			print("setting already tested")
 			return True
 		else:
 			return False
@@ -174,22 +175,22 @@ class TensorFlowSTLWrapper:
 		self.net = tfnet.TensorFlowNetwork(task_df, copy.deepcopy(self.wanted_feats), self.wanted_labels, verbose=False, val_type=self.val_type)
 
 		if len(self.net.train_X) == 0 or len(self.net.train_y) == 0:
-			print "No training data for this task!"
+			print("No training data for this task!")
 			return dict()
 		if len(self.net.test_X) == 0:
-			print "No testing data for this task! Skipping",
+			print("No testing data for this task! Skipping")
 			return dict()
 		if np.shape(self.net.train_X)[1] == 0: 
-			print "All columns were null, this task has no features left!"
+			print("All columns were null, this task has no features left!")
 			return dict()
 		if len(self.net.train_X) != len(self.net.train_y):
-			print "Unequal length of X and Y dataframe!"
+			print("Unequal length of X and Y dataframe!")
 			return dict()
 
 		df = pd.DataFrame()
 		
 		#sweep all possible combinations of parameters
-		print "...sweeping all parameters for this task..."
+		print("...sweeping all parameters for this task...")
 		for hidden_layers in self.architectures:
 			for l2_beta in self.l2_regularizers:
 				for lrate in self.learning_rates:
@@ -252,7 +253,7 @@ class TensorFlowSTLWrapper:
 		preds_df = self.net.get_preds_for_df()
 		label_name = setting_dict['task_name']
 		preds_df.to_csv(self.results_path + "Preds-" + self.save_prefix + label_name + '.csv')
-		print "Preds df saved to", self.results_path + "Preds-" + self.save_prefix + label_name + '.csv'
+		print("Preds df saved to", self.results_path + "Preds-" + self.save_prefix + label_name + '.csv')
 
 		return self.net.final_test_results['acc'], self.net.final_test_results['auc'], preds
 
@@ -275,14 +276,14 @@ class TensorFlowSTLWrapper:
 
 	
 	def runOneTask(self, task, target_label):
-		print "\nRunning task", task
+		print("\nRunning task", task)
 		if self.cont:
 			if self.settingAlreadyDone(task):
 				if self.redo_test:
 					self.redoTestResult(task)
 				best_setting = self.find_best_setting(task)
-				print "The setting that produced the best validation results for task", task, "was:"
-				print best_setting
+				print("The setting that produced the best validation results for task", task, "was:")
+				print(best_setting)
 				self.getFinalResultsForTask(best_setting)
 				return 
 
@@ -292,10 +293,10 @@ class TensorFlowSTLWrapper:
 		results_dict['task_name'] = task
 		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
 		
-		print "\n", self.val_results_df.tail(n=1)
+		print("\n", self.val_results_df.tail(n=1))
 		t1 = time()
 		this_time = t1 - t0
-		print "It took", this_time, "seconds to obtain this result"
+		print("It took", this_time, "seconds to obtain this result")
 
 		self.time_sum = self.time_sum + this_time
 
@@ -315,13 +316,13 @@ class TensorFlowSTLWrapper:
 		mins = (total_secs_remaining % 3600) / 60
 		secs = (total_secs_remaining % 3600) % 60
 
-		print "\n", num_done, "settings processed so far,", num_remaining, "left to go"
-		print "Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs"
+		print("\n", num_done, "settings processed so far,", num_remaining, "left to go")
+		print("Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs")
 
 	def run(self):
-		print "\nYou have chosen to test a total of", self.num_settings, "settings for each task"
-		print "There are", self.n_tasks, "tasks, meaning you are training a total of..."
-		print "\t", self.num_settings * self.n_tasks, "neural networks!!"
+		print("\nYou have chosen to test a total of", self.num_settings, "settings for each task")
+		print("There are", self.n_tasks, "tasks, meaning you are training a total of...")
+		print("\t", self.num_settings * self.n_tasks, "neural networks!!")
 		sys.stdout.flush()
 
 		if self.users_as_tasks:
@@ -341,78 +342,78 @@ class TensorFlowSTLWrapper:
 		self.val_results_df.to_csv(self.results_path + self.save_prefix + '.csv')
 
 		if self.users_as_tasks:
-			print "\n\nFINAL RESULTS - Averaging individual models:"
-			print "\tValidation set: Accuracy =", np.nanmean(self.val_results_df['val_acc']), "AUC = ", np.nanmean(self.val_results_df['val_auc'])
-			print "\tTest set: Accuracy =", np.nanmean(self.val_results_df['test_acc']), "AUC = ", np.nanmean(self.val_results_df['test_auc'])
-			print ""
-			print "FINAL RESULTS - Aggregating predictions of individual models"
+			print("\n\nFINAL RESULTS - Averaging individual models:")
+			print("\tValidation set: Accuracy =", np.nanmean(self.val_results_df['val_acc']), "AUC = ", np.nanmean(self.val_results_df['val_auc']))
+			print("\tTest set: Accuracy =", np.nanmean(self.val_results_df['test_acc']), "AUC = ", np.nanmean(self.val_results_df['test_auc']))
+			print("")
+			print("FINAL RESULTS - Aggregating predictions of individual models")
 			agg_auc = helper.computeAuc(self.cumulative_test_preds, self.cumulative_test_true)
 			agg_acc = helper.getBinaryAccuracy(self.cumulative_test_preds, self.cumulative_test_true)
-			print "\tTest set: Accuracy =", agg_acc, "AUC = ", agg_auc
+			print("\tTest set: Accuracy =", agg_acc, "AUC = ", agg_auc)
 
 
 if __name__ == "__main__":
-	print "TENSOR FLOW STL MODEL SELECTION"
-	print "\tFor each tasl individually, this code will sweep a set of network architectures and parameters to find the ideal settings"
-	print "\tIt will record the settings, validation and test results for each user"
+	print("TENSOR FLOW STL MODEL SELECTION")
+	print("\tFor each tasl individually, this code will sweep a set of network architectures and parameters to find the ideal settings")
+	print("\tIt will record the settings, validation and test results for each user")
 
 	if len(sys.argv) < 3:
-		print "Error: usage is python tensorFlowWrapperSTL.py <data file> <task type> <target label> <continue> <redo test>"
-		print "\t<data file>: e.g. dataset-Simple-Group.csv - program will look in the following directory for this file", DEFAULT_DATASETS_PATH
-		print "\t<task type>: type 'users' for users as tasks, or 'wellbeing' for wellbeing measures as tasks"
-		print "\t<target label>: Only required for users-as-tasks. Enter the name of the label you would like classify on. E.g. tomorrow_Group_Happiness_Evening_Label."
-		print "\t<continue>: optional. If 'True', the neural net will pick up from where it left off by loading a previous validation results file"
-		print "\t<redo test>: optional. If 'redo' the neural net will go through the saved validation results file and compute test predictions for each user for each setting. It will collect all the preds and only compute AUC at the end"
+		print("Error: usage is python tensorFlowWrapperSTL.py <data file> <task type> <target label> <continue> <redo test>")
+		print("\t<data file>: e.g. dataset-Simple-Group.csv - program will look in the following directory for this file", DEFAULT_DATASETS_PATH)
+		print("\t<task type>: type 'users' for users as tasks, or 'wellbeing' for wellbeing measures as tasks")
+		print("\t<target label>: Only required for users-as-tasks. Enter the name of the label you would like classify on. E.g. tomorrow_Group_Happiness_Evening_Label.")
+		print("\t<continue>: optional. If 'True', the neural net will pick up from where it left off by loading a previous validation results file")
+		print("\t<redo test>: optional. If 'redo' the neural net will go through the saved validation results file and compute test predictions for each user for each setting. It will collect all the preds and only compute AUC at the end")
 		sys.exit()
 	filename= sys.argv[1] #get data file from command line argument
 	task_type = sys.argv[2]
 	if len(sys.argv) >= 4:
 		target_label = sys.argv[3]
-		print "Classifying on target label:", target_label
+		print("Classifying on target label:", target_label)
 	else:
 		target_label = None
 
-	print "\nLoading dataset", DEFAULT_DATASETS_PATH + filename
+	print("\nLoading dataset", DEFAULT_DATASETS_PATH + filename)
 	if task_type == 'wellbeing':
 		users_as_tasks = False
-		print "Performing wellbeing-as-tasks classification\n"
+		print("Performing wellbeing-as-tasks classification\n")
 	else:
 		users_as_tasks = True
-		print "Performing users-as-tasks classification\n"
+		print("Performing users-as-tasks classification\n")
 
 	if len(sys.argv) >= 5 and sys.argv[4] == 'True':
 		cont = True
-		print "Okay, will continue from a previously saved validation results file for this problem"
+		print("Okay, will continue from a previously saved validation results file for this problem")
 	else:
 		cont = False
-	print ""
+	print("")
 
 	redo = False
 	if len(sys.argv) >= 6 and sys.argv[5] == 'redo':
 		redo = True
-		print "Okay, will redo all the test results to get a better AUC"
+		print("Okay, will redo all the test results to get a better AUC")
 
 
 	wrapper = TensorFlowSTLWrapper(filename, target_label=target_label, users_as_tasks=users_as_tasks, cont=cont,
 										results_path=DEFAULT_RESULTS_PATH, datasets_path=DEFAULT_DATASETS_PATH, figures_path=DEFAULT_FIGURES_PATH)
 	
 	if not redo:
-		print "\nThe following parameter settings will be tested for each task:"
-		print "\tl2_regularizers:  \t", wrapper.l2_regularizers
-		print "\tlearning_rates:   \t", wrapper.learning_rates
-		print "\tdropout:          \t", wrapper.dropout
-		print "\tdecay:            \t", wrapper.decay
-		print "\tdecay_steps:      \t", wrapper.decay_steps
-		print "\tdecay_rates:      \t", wrapper.decay_rates
-		print "\tbatch_sizes:      \t", wrapper.batch_sizes
-		print "\toptimizers:       \t", wrapper.optimizers
-		print "\ttrain_steps:      \t", wrapper.train_steps
+		print("\nThe following parameter settings will be tested for each task:")
+		print("\tl2_regularizers:  \t", wrapper.l2_regularizers)
+		print("\tlearning_rates:   \t", wrapper.learning_rates)
+		print("\tdropout:          \t", wrapper.dropout)
+		print("\tdecay:            \t", wrapper.decay)
+		print("\tdecay_steps:      \t", wrapper.decay_steps)
+		print("\tdecay_rates:      \t", wrapper.decay_rates)
+		print("\tbatch_sizes:      \t", wrapper.batch_sizes)
+		print("\toptimizers:       \t", wrapper.optimizers)
+		print("\ttrain_steps:      \t", wrapper.train_steps)
 
-		print "\nThe following network structures will be tested:"
-		print "\t", wrapper.architectures
+		print("\nThe following network structures will be tested:")
+		print("\t", wrapper.architectures)
 
-		print "\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv'
-		print "\nThe validation accuracy figures will be saved in:", wrapper.figures_path + wrapper.save_prefix + '.eps'
+		print("\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv')
+		print("\nThe validation accuracy figures will be saved in:", wrapper.figures_path + wrapper.save_prefix + '.eps')
 
 		wrapper.run()
 	else:

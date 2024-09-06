@@ -79,8 +79,8 @@ def test_single_distribution():
 
     samples = distribution.rvs(size=1000)
 
-    print "Percent of samples at 0", sum(abs(samples) < 1e-13) / float(len(samples))
-    print "Percent of samples at 2", sum(abs(samples - 2.39994) < 1e-13) / float(len(samples))
+    print("Percent of samples at 0", sum(abs(samples) < 1e-13) / float(len(samples)))
+    print("Percent of samples at 2", sum(abs(samples - 2.39994) < 1e-13) / float(len(samples)))
 
     plt.hist(samples, bins=np.arange(-4, 4, .25), normed=True)
     plt.plot(x_vals, distribution.pdf(x_vals))

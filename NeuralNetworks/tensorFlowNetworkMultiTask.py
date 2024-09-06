@@ -18,6 +18,7 @@ import random
 import copy
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
@@ -28,8 +29,8 @@ import helperFuncs as helper
 import tensorFlowNetwork as tfnet
 
 def reloadFiles():
-	reload(helper)
-	reload(tfnet)
+	importlib.reload(helper)
+	importlib.reload(tfnet)
 
 DEFAULT_BATCH_SIZE = 50
 MINIMUM_STEPS = 2000
@@ -74,13 +75,13 @@ class TensorFlowNetworkMTL:
 		if val_type == 'cross':
 			assert (self.val_tasks is not None)
 			self.num_cross_folds = num_cross_folds
-			print "Generating cross validation sets for each ppt"
+			print("Generating cross validation sets for each ppt")
 			for i in range(self.n_tasks):
 				self.train_tasks[i]['crossVal_X'], self.train_tasks[i]['crossVal_y'] = helper.generateCrossValSet(self.train_tasks[i]['X'], self.train_tasks[i]['Y'], self.val_tasks[i]['X'], self.val_tasks[i]['Y'], self.num_cross_folds, verbose=False)			
 
 		self.input_size = helper.calculateNumFeatsInTaskList(self.train_tasks)
 		self.output_size = np.shape(self.train_tasks[0]['Y'])[1]
-		print "OUTPUT SIZE IS CALCULATED TO BE:", self.output_size
+		print("OUTPUT SIZE IS CALCULATED TO BE:", self.output_size)
 
 		#parameters that can be tuned
 		self.l2_beta = 5e-4
@@ -295,9 +296,9 @@ class TensorFlowNetworkMTL:
 		self.task_b2 = tf.Variable(task_initial_b2, name="task_bias2")
 
 		if self.verbose:
-			print "Okay, making a neural net with the following structure:"
-			print "\tShared:", shared_sizes
-			print "\tTask:", tf.shape(self.task_w1), "x", tf.shape(self.task_w2)
+			print("Okay, making a neural net with the following structure:")
+			print("\tShared:", shared_sizes)
+			print("\tTask:", tf.shape(self.task_w1), "x", tf.shape(self.task_w2))
 
 	def setUpGraph(self, init_metrics=True):
 		self.graph = tf.Graph()
@@ -479,11 +480,11 @@ class TensorFlowNetworkMTL:
 		self.logValNans(nan_percent_val)
 		self.logTrainNans(nan_percent_train)
 		if self.verbose:
-			print "Having to get rid of", num_nans_train, "nans in the training predictions:", nan_percent_train, "%"
-			print "\tand", num_nans_val, "nans in the validation predictions:", nan_percent_val, "%"
+			print("Having to get rid of", num_nans_train, "nans in the training predictions:", nan_percent_train, "%")
+			print("\tand", num_nans_val, "nans in the validation predictions:", nan_percent_val, "%")
 			
 		if nan_percent_train > 40 or nan_percent_val > 40:
-			print "TOO MANY NANS! Terminating early"
+			print("TOO MANY NANS! Terminating early")
 			return -1 
 		
 		#if not self.print_per_task:
@@ -500,16 +501,16 @@ class TensorFlowNetworkMTL:
 		# accuracy_output_every_n is a multiple of accuracy_logged_every_n
 		if self.verbose and (step % self.accuracy_output_every_n  == 0):
 			print("\nMinibatch loss at step %d: %f" % (step, loss))
-			print ("Training accuracy:", train_acc, "AUC:", train_auc)
+			print("Training accuracy:", train_acc, "AUC:", train_auc)
 			print("Validation accuracy:", self.training_val_results['acc'][-1])
 			print("Validation AUC:", self.training_val_results['auc'][-1])
 			if self.print_per_task:
-				print "Validation results!"
+				print("Validation results!")
 				for label in self.optimize_labels:
-					print "\t", label
+					print("\t", label)
 					for metric in RESULTS_METRICS:
-						print "\t\t", metric, self.training_val_results_per_task[metric][label][-1]
-				print ""
+						print("\t\t", metric, self.training_val_results_per_task[metric][label][-1])
+				print("")
 
 	def get_test_results(self):
 		print("RESULTS ON HELD-OUT TEST SET...")
@@ -535,12 +536,12 @@ class TensorFlowNetworkMTL:
 			acc, auc, f1, precision, recall = tfnet.getAllMetricsForPredsOneHot(preds, y)
 
 			if self.print_per_task:
-				print self.test_tasks[t]['Name']
-				print "\tacc:", acc
-				print "\tauc:", auc
-				print "\tf1:", f1
-				print "\tprecision:", precision
-				print "\trecall:", recall					
+				print(self.test_tasks[t]['Name'])
+				print("\tacc:", acc)
+				print("\tauc:", auc)
+				print("\tf1:", f1)
+				print("\tprecision:", precision)
+				print("\trecall:", recall)
 			
 			test_accs.append(acc)
 			test_aucs.append(auc)
@@ -558,14 +559,14 @@ class TensorFlowNetworkMTL:
 		num_nans_test = np.sum(np.isnan(test_y_hat))
 		total_test = np.shape(test_y_hat)[0] * np.shape(test_y_hat)[1]
 		nan_percent_test = (num_nans_test / float(total_test)) * 100.0
-		print "Having to get rid of", num_nans_test, "nans in the testing predictions:", nan_percent_test, "%"
+		print("Having to get rid of", num_nans_test, "nans in the testing predictions:", nan_percent_test, "%")
 		test_y_hat[np.isnan(test_y_hat)] = 0.5
 		
-		print "\nHELD OUT TEST METRICS COMPUTED BY APPENDING ALL PREDS"
+		print("\nHELD OUT TEST METRICS COMPUTED BY APPENDING ALL PREDS")
 		acc, auc, f1, precision, recall = tfnet.getAllMetricsForPredsOneHot(test_y_hat, test_y_true)
 		print("... Acc:", acc, "AUC:", auc, "F1:", f1, "Precision:", precision, "Recall:", recall) 
 
-		print "\nHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS"
+		print("\nHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS")
 		acc = np.nanmean(test_accs)
 		auc = np.nanmean(test_aucs)
 		f1 = np.nanmean(test_f1s)
@@ -617,7 +618,7 @@ class TensorFlowNetworkMTL:
 			f1s.append(f1)
 			precisions.append(precision)
 			recalls.append(recall)
-		if PRINT_CROSS_VAL_FOLDS: print "\t\tPer-fold cross-validation accuracy: ", accs
+		if PRINT_CROSS_VAL_FOLDS: print("\t\tPer-fold cross-validation accuracy: ", accs)
 		return np.nanmean(accs), np.nanmean(aucs), np.nanmean(f1s), np.nanmean(precisions), np.nanmean(recalls)
 
 	def save_model(self, file_name, directory):
@@ -627,7 +628,7 @@ class TensorFlowNetworkMTL:
 		file_name: String name to use for the checkpoint and rewards files.
 		Defaults to self.model_name if None is provided.
 		"""
-		if self.verbose: print "Saving model..."
+		if self.verbose: print("Saving model...")
 		
 		save_dir = directory + file_name
 		os.mkdir(save_dir)
@@ -669,22 +670,22 @@ class TensorFlowNetworkMTL:
 		rewards are saved. If None, will not attempt to load stored
 		rewards.
 		"""
-		print "-----Loading saved model-----"
+		print("-----Loading saved model-----")
 		if checkpoint_name is not None:
 			checkpoint_file = os.path.join(directory, checkpoint_name)
 		else:
 			checkpoint_file = tf.train.latest_checkpoint(directory)
-		print "Looking for checkpoin in directory", directory
+		print("Looking for checkpoin in directory", directory)
 
 		if checkpoint_file is None:
-			print "Error! Cannot locate checkpoint in the directory"
+			print("Error! Cannot locate checkpoint in the directory")
 			return
 		else:
-			print "Found checkpoint file:", checkpoint_file
+			print("Found checkpoint file:", checkpoint_file)
 
 		if npz_file_name is not None:
 			npz_file_name = os.path.join(directory, npz_file_name)
-			print "Attempting to load saved reward values from file", npz_file_name
+			print("Attempting to load saved reward values from file", npz_file_name)
 			npz_file = np.load(npz_file_name)
 
 			self.training_val_results = npz_file['training_val_results'].item()

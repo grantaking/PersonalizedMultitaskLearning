@@ -10,6 +10,7 @@ import os
 import sys
 import copy
 from time import time
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
@@ -22,7 +23,7 @@ DEFAULT_NUM_CROSS_FOLDS = 5
 import helperFuncs as helper
 
 def reload_dependencies():
-	reload(helper)
+	importlib.reload(helper)
 
 # This optimizes parameters individually for each task
 
@@ -86,7 +87,7 @@ class STLWrapper:
 		self.time_sum = 0
 		if cont:
 			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.save_prefix + '.csv')
-			print '\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows"
+			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:
 			self.val_results_df = pd.DataFrame()
@@ -104,15 +105,15 @@ class STLWrapper:
 				self.params['C'] = [1,10,100]
 				self.params['beta'] = [.001, .01, .1]
 		"""
-		print "Error! define_params should be overwritten in child class"
+		print("Error! define_params should be overwritten in child class")
 		raise NotImplementedError
 
 	def train_and_predict_task(self, t, train_X, train_y, eval_X, param_dict):
-		print "Error! train_model_for_task should be overwritten in child class"
+		print("Error! train_model_for_task should be overwritten in child class")
 		raise NotImplementedError
 
 	def predict_task(self, X, t):
-		print "Error! predict_task should be overwritten in child class"
+		print("Error! predict_task should be overwritten in child class")
 		raise NotImplementedError
 
 	def calc_num_param_settings(self):
@@ -136,22 +137,22 @@ class STLWrapper:
 		this_param_dict's keys, a setting for it has not been chosen yet.
 		
 		Performs breadth-first-search"""
-		if debug: print "Working on a parameter dict containing", this_param_dict
+		if debug: print("Working on a parameter dict containing", this_param_dict)
 		for key in self.params.keys():
 			if key in this_param_dict:
 				continue
 			else:
 				this_setting = param_settings_left[key].pop()
-				if debug: print "Popped", key, "=", this_setting, "off the params left"
+				if debug: print("Popped", key, "=", this_setting, "off the params left")
 				if len(param_settings_left[key]) > 0:
-					if debug: print "Recursing on remaining parameters", param_settings_left
+					if debug: print("Recursing on remaining parameters", param_settings_left)
 					self.recurse_and_append_params(copy.deepcopy(param_settings_left), 
 												   copy.deepcopy(this_param_dict))
-				if debug: print "Placing the popped setting", key, "=", this_setting, "into the parameter dict"
+				if debug: print("Placing the popped setting", key, "=", this_setting, "into the parameter dict")
 				this_param_dict[key] = this_setting
 				
 		self.list_of_param_settings.append(this_param_dict)
-		if debug: print "Appending parameter dict to list:", this_param_dict, "\n"
+		if debug: print("Appending parameter dict to list:", this_param_dict, "\n")
 
 	def load_data(self):
 		self.test_tasks = helper.loadPickledTaskList(self.datasets_path, self.file_prefix, "Test",fix_y=True)
@@ -189,7 +190,7 @@ class STLWrapper:
 			mini_df = mini_df[mini_df[key] == param_dict[key]]
 			if len(mini_df) == 0:
 				return False
-		print "Setting already tested"
+		print("Setting already tested")
 		return True
 
 	def convert_param_dict_for_use(self, param_dict):
@@ -220,14 +221,14 @@ class STLWrapper:
 		return preds, true_y
 
 	def sweep_all_parameters(self):
-		print "\nYou have chosen to test a total of", self.num_settings / self.n_tasks, "settings"
-		print "for each of", self.n_tasks, "tasks, leading to a total of..."
-		print self.num_settings, "models to train!!"
+		print("\nYou have chosen to test a total of", self.num_settings / self.n_tasks, "settings")
+		print("for each of", self.n_tasks, "tasks, leading to a total of...")
+		print(self.num_settings, "models to train!!")
 		sys.stdout.flush()
 
 		#sweep all possible combinations of parameters
 		for t in range(self.n_tasks):
-			print "\nSweeping all parameters for task t:", self.train_tasks[t]['Name']
+			print("\nSweeping all parameters for task t:", self.train_tasks[t]['Name'])
 			for param_dict in self.list_of_param_settings:
 				these_params = copy.deepcopy(param_dict)
 				these_params['task_num'] = t
@@ -248,8 +249,8 @@ class STLWrapper:
 		this_time = t1 - t0
 		self.time_sum = self.time_sum + this_time
 		
-		print "\n", self.val_results_df.tail(n=1)
-		print "It took", this_time, "seconds to obtain this result"
+		print("\n", self.val_results_df.tail(n=1))
+		print("It took", this_time, "seconds to obtain this result")
 		self.print_time_estimate()
 		
 		sys.stdout.flush()
@@ -278,11 +279,11 @@ class STLWrapper:
 			all_f1.append(f1)
 			all_precision.append(precision)
 			all_recall.append(recall)
-			if print_per_fold: print "Fold", f, "acc", acc, "auc", auc, "f1", f1, "precision",precision,"recall",recall
+			if print_per_fold: print("Fold", f, "acc", acc, "auc", auc, "f1", f1, "precision",precision,"recall",recall)
 
 		if print_per_fold:
-			print "accs for all folds", all_acc
-			print "aucs for all folds", all_auc
+			print("accs for all folds", all_acc)
+			print("aucs for all folds", all_auc)
 		
 		# Add results to the dictionary
 		param_dict['val_acc'] = np.nanmean(all_acc)
@@ -302,8 +303,8 @@ class STLWrapper:
 		mins = (total_secs_remaining % 3600) / 60
 		secs = (total_secs_remaining % 3600) % 60
 
-		print "\n", num_done, "settings processed so far,", num_remaining, "left to go"
-		print "Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs"
+		print("\n", num_done, "settings processed so far,", num_remaining, "left to go")
+		print("Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs")
 
 	def get_baseline(self, Y):
 		Y = Y.tolist()
@@ -322,10 +323,10 @@ class STLWrapper:
 
 	def get_final_results(self, optimize_for='val_acc'):
 		if self.users_as_tasks and not self.check_test:
-			print "check_test is set to false, Will not evaluate performance on held-out test set."
+			print("check_test is set to false, Will not evaluate performance on held-out test set.")
 			return
-		print "\nAbout to evaluate results on held-out test set!!"
-		print "Will use the settings that produced the best", optimize_for
+		print("\nAbout to evaluate results on held-out test set!!")
+		print("Will use the settings that produced the best", optimize_for)
 		
 		all_preds = []
 		all_true_y = []
@@ -339,9 +340,9 @@ class STLWrapper:
 			task_settings = self.find_best_setting_for_task(t, optimize_for=optimize_for)
 			assert(task_settings['task_num'] == t)
 			if not self.users_as_tasks:
-				print "\nBEST SETTING FOR TASK", t, "-", task_settings['task_name']
-				print "The highest", optimize_for, "of", task_settings[optimize_for], "was found with the following settings:"
-				print task_settings
+				print("\nBEST SETTING FOR TASK", t, "-", task_settings['task_name'])
+				print("The highest", optimize_for, "of", task_settings[optimize_for], "was found with the following settings:")
+				print(task_settings)
 
 			task_settings = self.convert_param_dict_for_use(task_settings)
 			preds, true_y = self.get_preds_true_for_task(self.train_tasks, self.test_tasks, task_settings)
@@ -360,19 +361,19 @@ class STLWrapper:
 			per_task_recall.append(t_recall)
 
 			if not self.users_as_tasks:
-				print "\nFINAL TEST RESULTS FOR", helper.getFriendlyLabelName(self.train_tasks[t]['Name'])
-				print 'Acc:', t_acc, 'AUC:', t_auc, 'F1:', t_f1, 'Precision:', t_precision, 'Recall:', t_recall
+				print("\nFINAL TEST RESULTS FOR", helper.getFriendlyLabelName(self.train_tasks[t]['Name']))
+				print('Acc:', t_acc, 'AUC:', t_auc, 'F1:', t_f1, 'Precision:', t_precision, 'Recall:', t_recall)
 
-		print "\nHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS"
+		print("\nHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS")
 		avg_acc = np.nanmean(per_task_accs)
 		avg_auc = np.nanmean(per_task_aucs)
 		avg_f1 = np.nanmean(per_task_f1)
 		avg_precision = np.nanmean(per_task_precision)
 		avg_recall = np.nanmean(per_task_recall)
-		print 'Acc:', avg_acc, 'AUC:', avg_auc, 'F1:', avg_f1, 'Precision:', avg_precision, 'Recall:', avg_recall
+		print('Acc:', avg_acc, 'AUC:', avg_auc, 'F1:', avg_f1, 'Precision:', avg_precision, 'Recall:', avg_recall)
 
 		if self.test_csv_filename is not None:
-			print "\tSAVING HELD OUT PREDICITONS"
+			print("\tSAVING HELD OUT PREDICITONS")
 			if self.users_as_tasks:
 				task_column = 'user_id'
 				label_name = helper.getFriendlyLabelName(self.file_prefix)
@@ -386,7 +387,7 @@ class STLWrapper:
 					self.test_csv_filename, self.test_tasks, num_feats_expected=np.shape(self.test_tasks[0]['X'])[1])
 			predictions_df.to_csv(self.results_path + "Preds-" + self.save_prefix + '.csv')
 		else:
-			print "Uh oh, the test csv filename was not set, can't save test preds"
+			print("Uh oh, the test csv filename was not set, can't save test preds")
 
 	def run(self):
 		self.sweep_all_parameters()

@@ -12,6 +12,7 @@ import copy
 from time import time
 from sklearn.metrics import roc_auc_score
 import matplotlib.pyplot as plt
+import importlib
 
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
@@ -41,8 +42,8 @@ DEFAULT_VALIDATION_TYPE = 'cross'
 '''
 
 def reloadFiles():
-	reload(hblr)
-	reload(helper)
+	importlib.reload(hblr)
+	importlib.reload(helper)
 
 class HBLRWrapper:
 
@@ -90,7 +91,7 @@ class HBLRWrapper:
 		self.mu_multipliers = [0.0]
 
 		if test_run:
-			print "This is only a testing run. Using cheap settings to make it faster"
+			print("This is only a testing run. Using cheap settings to make it faster")
 			self.K = 2
 			self.max_iters = 5
 			self.n_tasks = 2
@@ -105,7 +106,7 @@ class HBLRWrapper:
 		self.time_sum = 0
 		if cont:
 			self.val_results_df = pd.DataFrame.from_csv(self.results_path + self.save_prefix + '.csv')
-			print '\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows"
+			print('\nPrevious validation results df loaded. It has', len(self.val_results_df), "rows")
 			self.started_from = len(self.val_results_df)
 		else:
 			self.val_results_df = pd.DataFrame()
@@ -145,7 +146,7 @@ class HBLRWrapper:
 									(self.val_results_df['tau20']== tau20) & \
 									(self.val_results_df['sigma_multiplier']== mu_mult) & \
 									(self.val_results_df['mu_multiplier']== sigma_mult)]) > 0:
-			print "setting already tested"
+			print("setting already tested")
 			return True
 		else:
 			return False
@@ -168,9 +169,9 @@ class HBLRWrapper:
 				all_task_Y.extend(task_Y)
 				all_preds.extend(preds)
 		if not helper.containsEachLabelType(all_preds):
-			print "for some bizarre reason, the preds for all tasks are the same class"
-			print "preds", all_preds
-			print "true_y", all_task_Y
+			print("for some bizarre reason, the preds for all tasks are the same class")
+			print("preds", all_preds)
+			print("true_y", all_task_Y)
 			auc = np.nan
 		else:
 			auc=roc_auc_score(all_task_Y, all_preds)
@@ -265,7 +266,7 @@ class HBLRWrapper:
 					per_task_f1[t].append(t_f1)
 					per_task_precision[t].append(t_precision)
 					per_task_recall[t].append(t_recall)
-					if print_per_fold: print "Fold", f, "Task", val_tasks[t]['Name'], "acc", t_acc, "auc", t_auc, "f1", t_f1, "precision",t_precision,"recall",t_recall
+					if print_per_fold: print("Fold", f, "Task", val_tasks[t]['Name'], "acc", t_acc, "auc", t_auc, "f1", t_f1, "precision",t_precision,"recall",t_recall)
 
 				fold_preds.extend(preds)
 				fold_true_y.extend(true_y)
@@ -277,11 +278,11 @@ class HBLRWrapper:
 			all_f1.append(f1)
 			all_precision.append(precision)
 			all_recall.append(recall)
-			if print_per_fold: print "Fold", f, "acc", acc, "auc", auc, "f1", f1, "precision",precision,"recall",recall
+			if print_per_fold:print("Fold", f, "acc", acc, "auc", auc, "f1", f1, "precision",precision,"recall",recall)
 
-		print "accs for all folds", all_acc
-		print "aucs for all folds", all_auc
-		print "clusters for all folds", clusters
+		print("accs for all folds", all_acc)
+		print("aucs for all folds", all_auc)
+		print("clusters for all folds", clusters)
 
 		if save_plots:
 			self.plotAccuracyAucAndClusters(all_acc, all_auc, clusters)
@@ -325,10 +326,10 @@ class HBLRWrapper:
 		
 		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
 		
-		print "\n", self.val_results_df.tail(n=1)
+		print("\n", self.val_results_df.tail(n=1))
 		t1 = time()
 		this_time = t1 - t0
-		print "It took", this_time, "seconds to obtain this result"
+		print("It took", this_time, "seconds to obtain this result")
 
 		self.time_sum = self.time_sum + this_time
 
@@ -348,14 +349,14 @@ class HBLRWrapper:
 		mins = (total_secs_remaining % 3600) / 60
 		secs = (total_secs_remaining % 3600) % 60
 
-		print "\n", num_done, "settings processed so far,", num_remaining, "left to go"
-		print "Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs"
+		print("\n", num_done, "settings processed so far,", num_remaining, "left to go")
+		print("Estimated time remaining:", hours, "hours", mins, "mins", secs, "secs")
 
 	def sweepAllParameters(self):
-		print "\nSweeping all parameters!"
+		print("\nSweeping all parameters!")
 		
 		self.calcNumSettingsDesired()
-		print "\nYou have chosen to test a total of", self.num_settings, "settings"
+		print("\nYou have chosen to test a total of", self.num_settings, "settings")
 		sys.stdout.flush()
 
 		#sweep all possible combinations of parameters
@@ -371,14 +372,14 @@ class HBLRWrapper:
 		max_acc = max(accuracies)
 		max_idx = accuracies.index(max_acc)
 
-		print "BEST SETTING!"
-		print "The highest validation accuracy of", max_acc, "was found with the following settings:"
-		print self.val_results_df.iloc[max_idx]
+		print("BEST SETTING!")
+		print("The highest validation accuracy of", max_acc, "was found with the following settings:")
+		print(self.val_results_df.iloc[max_idx])
 
 		if self.test_csv_filename is not None or save_final_results:
 			self.getFinalResultsAndSave(self.val_results_df.iloc[max_idx])
 		else:
-			print "Not running Final results"
+			print("Not running Final results")
 			return self.val_results_df.iloc[max_idx]
 
 	def run(self):
@@ -387,24 +388,24 @@ class HBLRWrapper:
 
 	def getFinalResultsAndSave(self, setting_dict):
 		if self.val_type == 'cross':
-			print "\nPlotting cross-validation results for best settings..."
+			print("\nPlotting cross-validation results for best settings...")
 			self.getCrossValidationResults(dict(), setting_dict['tau10'], setting_dict['tau20'], 
 											setting_dict['sigma_multiplier'], setting_dict['mu_multiplier'],
 											save_plots=True)
 
 		
-		print "\nRetraining on training data with the best settings..."
+		print("\nRetraining on training data with the best settings...")
 		self.initializeHBLRModel(self.train_tasks)
 		self.classifier.verbose = True
 		self.setClassifierToSetting(setting_dict['tau10'], setting_dict['tau20'], setting_dict['sigma_multiplier'], setting_dict['mu_multiplier'])
 		self.classifier.trainUntilConverged()
 		
-		print "\nPlotting and saving cool stuff about the final model..."
+		print("\nPlotting and saving cool stuff about the final model...")
 		self.saveImagePlot(self.classifier.phi, 'Phi')
 		pd.DataFrame(self.classifier.phi).to_csv(self.results_path + self.save_prefix + "-phi.csv")
 		self.saveConvergencePlots()
 
-		print "\nEvaluating results on held-out test set!! ..."
+		print("\nEvaluating results on held-out test set!! ...")
 		all_preds = []
 		all_true_y = []
 		all_X_data = []
@@ -432,27 +433,27 @@ class HBLRWrapper:
 			per_task_precision[t] = t_precision
 			per_task_recall[t] = t_recall
 
-		print "\tHELD OUT TEST METRICS COMPUTED BY APPENDING ALL PREDS"
+		print("\tHELD OUT TEST METRICS COMPUTED BY APPENDING ALL PREDS")
 		acc, auc, f1, precision, recall = helper.computeAllMetricsForPreds(all_preds, all_true_y)
-		print '\t\tAcc:', acc, 'AUC:', auc, 'F1:', f1, 'Precision:', precision, 'Recall:', recall
+		print('\t\tAcc:', acc, 'AUC:', auc, 'F1:', f1, 'Precision:', precision, 'Recall:', recall)
 
-		print "\n\tHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS"
+		print("\n\tHELD OUT TEST METRICS COMPUTED BY AVERAGING OVER TASKS")
 		avg_acc = np.nanmean(per_task_accs)
 		avg_auc = np.nanmean(per_task_aucs)
 		avg_f1 = np.nanmean(per_task_f1)
 		avg_precision = np.nanmean(per_task_precision)
 		avg_recall = np.nanmean(per_task_recall)
-		print '\t\tAcc:', avg_acc, 'AUC:', avg_auc, 'F1:', avg_f1, 'Precision:', avg_precision, 'Recall:', avg_recall
+		print('\t\tAcc:', avg_acc, 'AUC:', avg_auc, 'F1:', avg_f1, 'Precision:', avg_precision, 'Recall:', avg_recall)
 
-		print "\n\tHELD OUT TEST METRICS COMPUTED FOR EACH TASK"
+		print("\n\tHELD OUT TEST METRICS COMPUTED FOR EACH TASK")
 		if not self.users_as_tasks:
 			for t in range(self.n_tasks):
 				task_name = self.test_tasks[t]['Name']
 				if not self.users_as_tasks: task_name=helper.getFriendlyLabelName(task_name)
-				print "\t\t", task_name, "- Acc:", per_task_accs[t], "AUC:", per_task_aucs[t], 'F1:', per_task_f1[t], 'Precision:', per_task_precision[t], 'Recall:', per_task_recall[t]
+				print("\t\t", task_name, "- Acc:", per_task_accs[t], "AUC:", per_task_aucs[t], 'F1:', per_task_f1[t], 'Precision:', per_task_precision[t], 'Recall:', per_task_recall[t])
 
 		if self.test_csv_filename is not None:
-			print "\tSAVING HELD OUT PREDICITONS"
+			print("\tSAVING HELD OUT PREDICITONS")
 			if self.users_as_tasks:
 				task_column = 'user_id'
 				label_name = helper.getFriendlyLabelName(self.file_prefix)
@@ -466,9 +467,9 @@ class HBLRWrapper:
 				self.test_csv_filename, self.test_tasks, num_feats_expected=np.shape(self.test_tasks[0]['X'])[1])
 			predictions_df.to_csv(self.results_path + "Preds-" + self.save_prefix + '.csv')
 		else:
-			print "Uh oh, the test csv filename was not set, can't save test preds"
+			print("Uh oh, the test csv filename was not set, can't save test preds")
 
-		print "\t SAVING CLASSIFIER"
+		print("\t SAVING CLASSIFIER")
 		with open(self.results_path + "PickledModel-" + self.save_prefix + '.p',"w") as f:
 			pickle.dump(self.classifier,f)
 
@@ -528,50 +529,50 @@ class HBLRWrapper:
 
 	
 if __name__ == "__main__":
-	print "HBLR MODEL SELECTION"
-	print "\tThis code will sweep a set of parameters to find the ideal settings for HBLR for a single dataset"
+	print("HBLR MODEL SELECTION")
+	print("\tThis code will sweep a set of parameters to find the ideal settings for HBLR for a single dataset")
 
 	if len(sys.argv) < 3:
-		print "Error: usage is python HBLRWrapper.py <file prefix> <users as tasks> <continue>"
-		print "\t<file prefix>: e.g. datasetTaskList-Discard-Future-Group_ - program will look in the following directory for this file", DEFAULT_DATASETS_PATH
-		print "\t<users as tasks>: type 'users' for users as tasks, or 'wellbeing' for wellbeing measures as tasks"
-		print "\t<continue>: optional. If 'True', the wrapper will pick up from where it left off by loading a previous validation results file"
-		print "\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on"
+		print("Error: usage is python HBLRWrapper.py <file prefix> <users as tasks> <continue>")
+		print("\t<file prefix>: e.g. datasetTaskList-Discard-Future-Group_ - program will look in the following directory for this file", DEFAULT_DATASETS_PATH)
+		print("\t<users as tasks>: type 'users' for users as tasks, or 'wellbeing' for wellbeing measures as tasks")
+		print("\t<continue>: optional. If 'True', the wrapper will pick up from where it left off by loading a previous validation results file")
+		print("\t<csv file for testing>: optional. If you want to get the final test results, provide the name of a csv file to test on")
 		sys.exit()
 	filename= sys.argv[1] #get data file from command line argument
-	print "\nLoading dataset", DEFAULT_DATASETS_PATH + filename
-	print ""
+	print("\nLoading dataset", DEFAULT_DATASETS_PATH + filename)
+	print("")
 
 	if sys.argv[2] == 'users':
 		users_as_tasks = True
-		print "Okay, treating users as tasks. Will not print per-task results"
+		print("Okay, treating users as tasks. Will not print per-task results")
 	else:
 		users_as_tasks = False
-		print "Okay, treating wellbeing measures as tasks. Will save and print per-task results"
+		print("Okay, treating wellbeing measures as tasks. Will save and print per-task results")
 
 	if len(sys.argv) >= 4 and sys.argv[3] == 'True':
 		cont = True
-		print "Okay, will continue from a previously saved validation results file for this problem"
+		print("Okay, will continue from a previously saved validation results file for this problem")
 	else:
 		cont = False
-	print ""
+	print("")
 
 	if len(sys.argv) >= 5:
 		csv_test_file = sys.argv[4]
-		print "Okay, will get final test results on file", csv_test_file
-		print ""
+		print("Okay, will get final test results on file", csv_test_file)
+		print("")
 	else:
 		csv_test_file = None
 
 	wrapper = HBLRWrapper(filename, users_as_tasks=users_as_tasks, cont=cont, test_csv_filename=csv_test_file)
 	
-	print "\nThe following parameter settings will be tested:"
-	print "\ttau10:  	\t", wrapper.tau10s
-	print "\ttau20:   	\t", wrapper.tau20s
-	print "\tsigma multipliers: \t", wrapper.sigma_multipliers
-	print "\tmu multipliers:    \t", wrapper.mu_multipliers
+	print("\nThe following parameter settings will be tested:")
+	print("\ttau10:  	\t", wrapper.tau10s)
+	print("\ttau20:   	\t", wrapper.tau20s)
+	print("\tsigma multipliers: \t", wrapper.sigma_multipliers)
+	print("\tmu multipliers:    \t", wrapper.mu_multipliers)
 
-	print "\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv'
-	print "\nThe validation and testing figures will be saved in:", wrapper.figures_path + wrapper.save_prefix
+	print("\nThe validation results dataframe will be saved in:", wrapper.results_path + wrapper.save_prefix + '.csv')
+	print("\nThe validation and testing figures will be saved in:", wrapper.figures_path + wrapper.save_prefix)
 
 	wrapper.run()

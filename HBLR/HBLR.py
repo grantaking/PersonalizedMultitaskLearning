@@ -32,15 +32,15 @@ import HBLR_Distribution
 ACC_LOGGED_EVERY_N_STEPS = 10
 
 def plotConvergence(metric, title, save_path=None):
-    plt.figure()
-    plt.plot(metric,'o-')
-    plt.xlabel('Iteration')
-    plt.ylabel(title)
-    if save_path is not None:
-    	plt.savefig(save_path)
-    	plt.close()
-    else:
-    	plt.show()
+	plt.figure()
+	plt.plot(metric,'o-')
+	plt.xlabel('Iteration')
+	plt.ylabel(title)
+	if save_path is not None:
+		plt.savefig(save_path)
+		plt.close()
+	else:
+		plt.show()
 
 '''Given a dataset, trains the model'''
 class HBLR:
@@ -124,10 +124,10 @@ class HBLR:
 		self.theta_convergence_list = []
 
 		if self.debug:
-			print "initial phi", self.phi
-			print "initial small phi1", self.small_phi1
-			print "initial small phi2", self.small_phi2
-			print "initial tau1", self.tau1, "tau2", self.tau2 
+			print("initial phi", self.phi)
+			print("initial small phi1", self.small_phi1)
+			print("initial small phi2", self.small_phi2)
+			print("initial tau1", self.tau1, "tau2", self.tau2)
 
 	def trainUntilConverged(self):
 		self.initializeAllParameters()
@@ -135,8 +135,8 @@ class HBLR:
 		i=0
 		while i<self.max_iterations and (i<2 or self.xi_convergence_list[-1]>self.xi_tolerance):
 			if self.debug:
-				print "----------------"
-				print "iteration",i
+				print("----------------")
+				print("iteration",i)
 
 				plt.imshow(self.phi)
 				plt.show()
@@ -151,7 +151,7 @@ class HBLR:
 			if self.K>2:
 				restart = self.pruneK()
 				if restart:
-					if self.verbose: print "Restarting now with K=",self.K
+					if self.verbose: print("Restarting now with K=",self.K)
 					self.initializeAllParameters()
 					self.updateAllParameters()
 					i=0
@@ -169,11 +169,11 @@ class HBLR:
 					#else:
 					#	print "doesn't have both tasks",j,task_Y
 				if self.verbose:
-					print "Training. Iteration", i
+					print("Training. Iteration", i)
 					if i>0:
-						print "\tXi convergence", self.xi_convergence_list[-1]
-					print "\tavg training accuracy",np.mean(acc)
-					print "\tavg ROC AUC", np.mean(auc),"\n"
+						print("\tXi convergence", self.xi_convergence_list[-1])
+					print("\tavg training accuracy",np.mean(acc))
+					print("\tavg ROC AUC", np.mean(auc),"\n")
 
 			#compute convergence metrics
 			if i > 0:
@@ -182,7 +182,7 @@ class HBLR:
 				self.s_convergence_list.append(computeMatrixConvergence(0,self.s))
 				self.gamma_convergence_list.append(computeListOfListsConvergence(prev_gamma, self.gamma))
 				self.theta_convergence_list.append(computeMatrixConvergence(0, self.theta))
-				if self.debug: print "Training. Iteration", i, "- Xi convergence:", self.xi_convergence_list[-1]
+				if self.debug: print("Training. Iteration", i, "- Xi convergence:", self.xi_convergence_list[-1])
 
 			i+=1
 
@@ -247,21 +247,21 @@ class HBLR:
 
 				
 				self.s[m,k] = s_sum
-		if self.debug: print "s:", self.s
+		if self.debug: print("s:", self.s)
 
 
 	def updatePhi(self):
 		a = np.array([np.max(self.s, axis=1)]).T #as used in logsumexp trick https://hips.seas.harvard.edu/blog/2013/01/09/computing-log-sum-exp/
 		self.phi = np.exp(self.s - (a + np.log(np.atleast_2d(np.sum(np.exp(self.s - a),axis=1)).T)))
 		if self.debug: 
-			print "phi:", self.phi
+			print("phi:", self.phi)
 			
 	def computeSmallPhis(self):
 		self.small_phi1 = (1 + np.sum(self.phi,axis=0))[0:-1]
 		self.small_phi2 = self.tau1 / self.tau2 + np.array([np.sum(self.phi[:,i:]) for i in range(1,self.K)])
 		if self.debug: 
-			print "small phi1", self.small_phi1
-			print "small phi2", self.small_phi2
+			print("small phi1", self.small_phi1)
+			print("small phi2", self.small_phi2)
 
 	def computeTaus(self):
 		self.tau1 = self.tau10 + self.K - 1
@@ -270,7 +270,7 @@ class HBLR:
 			tau2_sum = tau2_sum + (scipy.special.psi(self.small_phi2[k]) \
 									- scipy.special.psi(self.small_phi1[k] + self.small_phi2[k]))
 		self.tau2 = self.tau20 - tau2_sum
-		if self.debug: print "tau1", self.tau1, "tau2", self.tau2
+		if self.debug: print("tau1", self.tau1, "tau2", self.tau2)
 
 	def updateGamma(self):
 		task_matrices = np.zeros((self.n_tasks, self.num_feats, self.num_feats))
@@ -288,7 +288,7 @@ class HBLR:
 				inner_sum = inner_sum + self.phi[m,k] * task_matrices[m,:,:]
 			self.gamma[k] = la.inv(la.inv(self.sigma) + 2*inner_sum)
 			if self.debug: 
-				print "gamma computation {0}".format(k), la.det(la.inv(self.sigma) + 2*inner_sum)
+				print("gamma computation {0}".format(k), la.det(la.inv(self.sigma) + 2*inner_sum))
 
 	def updateTheta(self):
 		for k in range(self.K):
@@ -311,7 +311,7 @@ class HBLR:
 
 				self.xi[m][n] = np.sqrt(inner_sum[0,0])
 				if self.xi[m][n]==0:
-					print m,n
+					print(m,n)
 
 	def predictBinary(self, X, task):
 		preds = self.predictProbability(task,X) 
