@@ -17,7 +17,9 @@ DEFAULT_FIGURES_PATH = '/Your/path/here/'
 DEFAULT_VAL_TYPE = 'cross'
 OUTPUT_EVERY_NTH = 3
 
-sys.path.append(PATH_TO_REPO)
+CODE_PATH = os.path.dirname(os.getcwd())
+sys.path.append(CODE_PATH)
+
 import tensorFlowNetwork as tfnet
 import tensorFlowNetworkMultiTask as mtltf
 import helperFuncs as helper

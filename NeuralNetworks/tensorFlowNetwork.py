@@ -19,7 +19,9 @@ sys.path.append(CODE_PATH)
 
 PATH_TO_DATA = '/Your/path/here/'
 
-sys.path.append(PATH_TO_REPO)
+CODE_PATH = os.path.dirname(os.getcwd())
+sys.path.append(CODE_PATH)
+
 import helperFuncs as helper
 
 DEFAULT_BATCH_SIZE = 50
