@@ -5,3 +5,5 @@ python NeuralNetworks/tensorFlowWrapper.py Path/task_list_file-Happiness_ multit
 NN job of some type - calmness
 python NeuralNetworks/tensorFlowWrapper.py Path/task_list_file-Calmness_ multitask wellbeing
 ../outputs/some_result_for_calmness.txt
+
+python NeuralNetworks/tensorFlowWrapper.py /Users/grant/Documents/GitHub/PersonalizedMultitaskLearning/example_data.csv multitask users
