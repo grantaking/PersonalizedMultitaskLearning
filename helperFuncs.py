@@ -93,7 +93,8 @@ def getBootstrapSample(test_df):
 	test_df = test_df.reset_index()
 	test_df = test_df.drop('index',1)
 	return test_df
-
+"""
+# The below function has an error in it and is not used, so commenting out for now
 def plotROC(auc_list,fpr_list,tpr_list):
 	mean_tpr = 0.0
 	mean_fpr = np.linspace(0,1,100)
@@ -121,7 +122,7 @@ def plotROC(auc_list,fpr_list,tpr_list):
 	plt.show()
 
 	return mean_auc, mean_fpr, mean_tpr
-
+"""
 def getBinaryAccuracy(pred,true_labels):
 	assert len(pred)==len(true_labels)
 

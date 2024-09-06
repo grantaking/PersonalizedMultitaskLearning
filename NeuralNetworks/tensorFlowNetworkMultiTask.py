@@ -117,13 +117,14 @@ class TensorFlowNetworkMTL:
 	def generateNewTrainingOrder(self):
 		return np.random.choice(len(self.train_tasks), len(self.train_tasks), replace=False)
 
-	def setValTasks(self, val_tasks):
-		self.val_tasks = val_tasks
-		self.val_tasks[i]['Y'] = tfnet.changeLabelsToOneHotEncoding(self.val_tasks[i]['Y'])
+	# These functions seem to have an error in them and are not used, so commenting out
+	#def setValTasks(self, val_tasks):
+	#	self.val_tasks = val_tasks
+	#	self.val_tasks[i]['Y'] = tfnet.changeLabelsToOneHotEncoding(self.val_tasks[i]['Y'])
 					
-	def setTestTasks(self, test_tasks):
-		self.test_tasks = test_tasks
-		self.test_tasks[i]['Y'] = tfnet.changeLabelsToOneHotEncoding(self.test_tasks[i]['Y'])
+	#def setTestTasks(self, test_tasks):
+	#	self.test_tasks = test_tasks
+	#	self.test_tasks[i]['Y'] = tfnet.changeLabelsToOneHotEncoding(self.test_tasks[i]['Y'])
 
 	def initializeStoredTrainingMetrics(self):
 		self.val_nan_percent = []
