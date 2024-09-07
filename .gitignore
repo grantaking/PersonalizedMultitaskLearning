@@ -1,5 +1,4 @@
 
 *.pyc
-/processed
-/raw
+/data
 /outputs
