@@ -16,7 +16,6 @@ import importlib
 
 CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
-print(CODE_PATH)
 
 DEFAULT_RESULTS_PATH = ''
 DEFAULT_DATASETS_PATH = ''
