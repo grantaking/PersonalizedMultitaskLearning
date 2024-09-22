@@ -17,14 +17,14 @@ import importlib
 CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 
-DEFAULT_RESULTS_PATH = ''
-DEFAULT_DATASETS_PATH = ''
-DEFAULT_FIGURES_PATH = ''
+DEFAULT_RESULTS_PATH = 'results/'
+DEFAULT_DATASETS_PATH = 'data/'
+DEFAULT_FIGURES_PATH = 'figures/'
 
 import HBLR as hblr
 import helperFuncs as helper
 
-DEFAULT_NUM_CROSS_FOLDS = 5
+DEFAULT_NUM_CROSS_FOLDS = 2
 DEFAULT_MAX_ITERS = 75
 SAVE_RESULTS_EVERY_X_TESTS = 1
 DEFAULT_VALIDATION_TYPE = 'cross'
@@ -324,7 +324,7 @@ class HBLRWrapper:
 			self.setClassifierToSetting(tau10, tau20, sigma_mult, mu_mult)
 			results_dict = self.getValidationResults(results_dict)
 		
-		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
+		self.val_results_df = self.val_results_df = pd.concat([self.val_results_df, pd.DataFrame([results_dict])],ignore_index=True)
 		
 		print("\n", self.val_results_df.tail(n=1))
 		t1 = time()

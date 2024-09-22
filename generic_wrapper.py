@@ -15,7 +15,7 @@ import importlib
 CODE_PATH = os.path.dirname(os.getcwd())
 sys.path.append(CODE_PATH)
 
-DEFAULT_MAIN_DIRECTORY = '/Your/path/here/'
+DEFAULT_MAIN_DIRECTORY = ''
 
 DEFAULT_VALIDATION_TYPE = 'cross' #'val'
 DEFAULT_NUM_CROSS_FOLDS = 5
@@ -243,7 +243,7 @@ class STLWrapper:
 		t0 = time()
 		
 		results_dict = self.get_cross_validation_results(param_dict)
-		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
+		self.val_results_df = pd.concat([self.val_results_df, pd.DataFrame([results_dict])],ignore_index=True)
 		
 		t1 = time()
 		this_time = t1 - t0

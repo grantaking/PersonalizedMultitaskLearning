@@ -7,4 +7,4 @@ python NeuralNetworks/tensorFlowWrapper.py Path/task_list_file-Calmness_ multita
 ../outputs/some_result_for_calmness.txt
 
 python NeuralNetworks/tensorFlowWrapper.py /Users/grant/Documents/GitHub/PersonalizedMultitaskLearning/example_data.csv multitask users
-python HBLR/HBLRWrapper.py example_data.csv example_output.txt
+python HBLR/HBLRWrapper.py data/datasetUserTaskList-example_data-tomorrow-Happiness_ users
