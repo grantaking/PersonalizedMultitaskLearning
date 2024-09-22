@@ -32,7 +32,7 @@ class STLWrapper:
 	and only implements cross validation."""
 	def __init__(self, file_prefix, users_as_tasks=False, cont=False, classifier_name='LSSVM', 
 				num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, main_directory=DEFAULT_MAIN_DIRECTORY, 
-				datasets_path='Data/Datasets/Discard20/', cant_train_with_one_class=True,
+				datasets_path='data/Datasets/Discard20/', cant_train_with_one_class=True,
 				check_test=False, save_results_every_nth=3, test_csv_filename=None):
 		""" Initializes the parent model with fields useful for all child wrapper classes
 
@@ -60,8 +60,8 @@ class STLWrapper:
 		# memorize arguments and construct paths
 		self.main_directory = main_directory
 		self.classifier_name = classifier_name
-		self.results_path = main_directory + 'Results/' + classifier_name + '/'
-		self.figures_path = main_directory + 'Figures/' + classifier_name + '/'
+		self.results_path = main_directory + 'results/' + classifier_name + '/'
+		self.figures_path = main_directory + 'rigures/' + classifier_name + '/'
 		self.datasets_path = main_directory + datasets_path
 		self.cont = cont
 		self.users_as_tasks = users_as_tasks
