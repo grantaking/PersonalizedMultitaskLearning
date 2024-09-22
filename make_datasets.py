@@ -106,7 +106,7 @@ def getUserTaskListFromDataset(datafile, target_label, suppress_output=False,
 	"""Partitions a .csv file into a task-dict-list pickle file by separating
 	different individuals (users) into the different tasks."""
 	df = pd.read_csv(datafile)
-	wanted_feats = [x for x in df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and x!='classifier_friendly_ppt_id' and 'Cluster' not in x and '_Label' not in x]
+	wanted_feats = [x for x in df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and x!='classifier_friendly_ppt_id' and 'Cluster' not in x and '_Label' not in x]
 	
 	df = helper.normalizeAndFillDataDf(df, wanted_feats, [target_label], suppress_output=True)
 	df = df.reindex(np.random.permutation(df.index))
