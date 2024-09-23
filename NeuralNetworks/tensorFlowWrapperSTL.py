@@ -10,12 +10,12 @@ import copy
 from time import time
 import importlib
 
-CODE_PATH = os.path.dirname(os.getcwd())
+CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 
-DEFAULT_RESULTS_PATH = '/Your/path/here/'
-DEFAULT_DATASETS_PATH = '/Your/path/here/'
-DEFAULT_FIGURES_PATH = '/Your/path/here/'
+DEFAULT_RESULTS_PATH = 'results/'
+DEFAULT_DATASETS_PATH = 'data/'
+DEFAULT_FIGURES_PATH = 'figures/'
 
 import tensorFlowNetwork as tfnet
 import helperFuncs as helper

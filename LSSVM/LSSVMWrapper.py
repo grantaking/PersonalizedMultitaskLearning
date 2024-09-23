@@ -11,12 +11,12 @@ from time import time
 from sklearn.metrics.pairwise import rbf_kernel
 import importlib
 
-CODE_PATH = os.path.dirname(os.getcwd())
+CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 
-DEFAULT_RESULTS_PATH = '/Your/path/here/'
-DEFAULT_DATASETS_PATH = '/Your/path/here/'
-DEFAULT_FIGURES_PATH = '/Your/path/here/'
+DEFAULT_RESULTS_PATH = 'results/'
+DEFAULT_DATASETS_PATH = 'data/'
+DEFAULT_FIGURES_PATH = 'figures/'
 
 from generic_wrapper import STLWrapper
 import helperFuncs as helper
