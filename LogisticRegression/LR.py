@@ -9,7 +9,7 @@ import os
 import pickle
 import importlib
 
-CODE_PATH = os.path.dirname(os.getcwd())
+CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 import helperFuncs as helper
 
