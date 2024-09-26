@@ -188,9 +188,9 @@ def loadCrossValData(datasets_path, file_prefix, fold, reshape=True, fix_y=False
 def generateCrossValPickleFiles(datasets_path, file_prefix, num_cross_folds):
 	save_prefix = getTaskListFileCoreName(file_prefix)
 
-	if os.path.exists(datasets_path + "CVFold0" + save_prefix + "Train.p"):
-		print("\nCross validation folds have already been created")
-		return
+	#if os.path.exists(datasets_path + "CVFold0" + save_prefix + "Train.p"):
+	#	print("\nCross validation folds have already been created")
+	#	return
 
 	train_tasks = pickle.load(open(datasets_path + file_prefix + "Train.p","rb"))
 	val_tasks =  pickle.load(open(datasets_path + file_prefix + "Val.p","rb"))
@@ -308,11 +308,11 @@ def getOfficialLabelName(string):
 		return None
 
 def getMinutesFromMidnight(df, feature):
-	time_deltas = pd.to_datetime(df[feature]) - pd.to_datetime(df['timestamp'])
+	time_deltas = pd.to_datetime(df[feature]) - pd.to_datetime(df['date'])
 	mins = [time / pd.Timedelta('1 minute') for time in time_deltas]
 	return [time if not pd.isnull(time) else np.nan for time in mins]
 
-def mergeDataframes(all_df, mod_df, mod_name, merge_type='inner',merge_keys=['user_id','timestamp']):
+def mergeDataframes(all_df, mod_df, mod_name, merge_type='inner',merge_keys=['pid','date']):
 	print("Merging", mod_name)
 	old_len = len(all_df)
 	print("\tMerged df started with", old_len, "samples")
@@ -325,7 +325,7 @@ def mergeDataframes(all_df, mod_df, mod_name, merge_type='inner',merge_keys=['us
 
 def renameAllColsWithPrefix(df,prefix,remove_len=0):
 	for feat in df.columns.values:
-		if feat != 'user_id' and feat != 'timestamp':
+		if feat not in ['pid','date']:
 			df = df.rename(columns={feat:prefix+feat[remove_len:]})
 	return df
 
@@ -459,16 +459,16 @@ def dropCols(df,cols):
 	return df
 
 def convertTimestampViaString(row):
-	return str(row['timestamp'])
+	return str(row['date'])
 
 def getMinutesFromMidnight(df, feature):
-	time_deltas = pd.to_datetime(df[feature]) - pd.to_datetime(df['timestamp'])
+	time_deltas = pd.to_datetime(df[feature]) - pd.to_datetime(df['date'])
 	mins = [time / pd.Timedelta('1 minute') for time in time_deltas]
 	return [time if not pd.isnull(time) else np.nan for time in mins]
 
 def renameAllColsWithPrefix(df,prefix,remove_len=0):
 	for feat in df.columns.values:
-		if feat != 'user_id' and feat != 'timestamp':
+		if feat != 'pid' and feat != 'date':
 			df = df.rename(columns={feat:prefix+feat[remove_len:]})
 	return df
 
@@ -608,7 +608,7 @@ def get_test_predictions_for_df_with_task_column(model_predict_func, csv_path, t
 												tasks_are_ints=True):
 	data_df = pd.read_csv(csv_path)
 	
-	wanted_feats = [x for x in data_df.columns.values if x != 'user_id' and x != 'timestamp' and 'ppt_id' not in x and x!= 'dataset' and '_Label' not in x and 'Cluster' not in x]
+	wanted_feats = [x for x in data_df.columns.values if x != 'pid' and x != 'date' and 'ppt_id' not in x and x!= 'dataset' and '_Label' not in x and 'Cluster' not in x]
 	if num_feats_expected is not None and len(wanted_feats) != num_feats_expected:
 		print("Error! Found", len(wanted_feats), 
 			  "features but was expecting to find", num_feats_expected)
@@ -650,7 +650,7 @@ def get_test_predictions_for_df_with_no_task_column(model_predict_func, csv_path
 													num_feats_expected=None):
 	data_df = pd.read_csv(csv_path)
 	
-	wanted_feats = [x for x in data_df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and '_Label' not in x and 'Cluster' not in x]
+	wanted_feats = [x for x in data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and '_Label' not in x and 'Cluster' not in x]
 	if num_feats_expected is not None and len(wanted_feats) != num_feats_expected:
 		print("Error! Found", len(wanted_feats), 
 			  "features but was expecting to find", num_feats_expected)

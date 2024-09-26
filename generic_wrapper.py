@@ -12,7 +12,7 @@ import copy
 from time import time
 import importlib
 
-CODE_PATH = os.path.dirname(os.getcwd())
+CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 
 DEFAULT_MAIN_DIRECTORY = ''
