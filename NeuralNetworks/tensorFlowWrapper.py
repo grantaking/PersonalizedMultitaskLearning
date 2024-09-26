@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+import tensorflow._api.v2.compat.v1 as tf
+tf.disable_v2_behavior()
 import sys
 import os
 import pickle
@@ -13,12 +14,11 @@ sys.path.append(CODE_PATH)
 DEFAULT_RESULTS_PATH = 'results/'
 DEFAULT_DATASETS_PATH = 'data/'
 DEFAULT_FIGURES_PATH = 'figures/'
+TARGET_LABEL = 'drink_TF_Label'
 
 DEFAULT_VAL_TYPE = 'cross'
 OUTPUT_EVERY_NTH = 3
 
-CODE_PATH = os.path.dirname(os.getcwd())
-sys.path.append(CODE_PATH)
 
 import tensorFlowNetwork as tfnet
 import tensorFlowNetworkMultiTask as mtltf
@@ -32,7 +32,7 @@ def reloadFiles():
 	mtltf.reloadFiles()
 
 class TensorFlowWrapper:
-	def __init__(self, dataset_name, target_label=None, trial_name=None, multilabel=False, multitask=False, 
+	def __init__(self, dataset_name, target_label=TARGET_LABEL, trial_name=None, multilabel=False, multitask=False, 
 				 print_per_task=False, test_steps=9001, results_path=DEFAULT_RESULTS_PATH, 
 				 datasets_path=DEFAULT_DATASETS_PATH, figures_path=DEFAULT_FIGURES_PATH, val_output_file=None, 
 				 val_type=DEFAULT_VAL_TYPE, cont=False, architectures=None, test_csv_filename=None):
@@ -72,7 +72,7 @@ class TensorFlowWrapper:
 			self.wanted_labels = self.net.optimize_labels
 		else:
 			self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
-			self.wanted_feats = [x for x in self.data_df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and '_Label' not in x]
+			self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and '_Label' not in x]
 			if self.multilabel:
 				self.wanted_labels = [x for x in self.data_df.columns.values if '_Label' in x and 'tomorrow_' in x and 'Evening' in x and 'Alertness' not in x and 'Energy' not in x]
 				self.optimize_labels = [x for x in self.wanted_labels if 'tomorrow_' in x and 'Evening_' in x]
@@ -81,7 +81,7 @@ class TensorFlowWrapper:
 
 			#actual network
 			self.net = tfnet.TensorFlowNetwork(self.data_df, self.wanted_feats, self.wanted_labels, optimize_labels=self.wanted_labels,
-											multilabel=self.multilabel, verbose=False, val_type=self.val_type)
+											multilabel=self.multilabel, verbose=False, val_type=self.val_type, print_per_task=print_per_task)
 
 		#parameters that can be tuned:
 		self.l2_regularizers = [1e-2, 1e-4]
@@ -211,7 +211,7 @@ class TensorFlowWrapper:
 				results_dict[friendly_label + '_f1'] = self.net.training_val_results_per_task['f1'][label][-1]
 				results_dict[friendly_label + '_precision'] = self.net.training_val_results_per_task['precision'][label][-1]
 				results_dict[friendly_label + '_recall'] = self.net.training_val_results_per_task['recall'][label][-1]
-		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
+		self.val_results_df = pd.concat([self.val_results_df,pd.DataFrame([results_dict])],ignore_index=True)
 		
 		print(self.val_results_df.tail(n=1))
 		t1 = time()
@@ -332,7 +332,7 @@ class TensorFlowWrapper:
 				
 				if 'User' in self.dataset_name:
 					print("Guessing the task column is user_id - if this is incorrect expect errors")
-					task_column = 'user_id'
+					task_column = 'pid'
 					tasks_are_ints = False
 				
 				if task_column is not None:

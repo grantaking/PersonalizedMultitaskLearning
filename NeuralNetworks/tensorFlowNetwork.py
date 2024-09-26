@@ -4,7 +4,8 @@ import matplotlib
 matplotlib.use('Agg')
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import tensorflow._api.v2.compat.v1 as tf
+tf.disable_v2_behavior()
 import sys
 import os
 import math
@@ -155,7 +156,7 @@ def _print_if_saved_setting_differs(class_var, setting_name, npz_file):
 
 class TensorFlowNetwork:
 	def __init__(self, data_df, wanted_feats, wanted_labels, multilabel=False, optimize_labels=None, 
-				verbose=True, num_cross_folds=5, val_type=DEFAULT_VAL_TYPE):
+				verbose=True, num_cross_folds=5, val_type=DEFAULT_VAL_TYPE, accuracy_logged_every_n=ACCURACY_LOGGED_EVERY_N_STEPS, print_per_task=False):
 		if multilabel and optimize_labels is None:
 			print("ERROR! need to specify which labels to optimize over if you are doing multilabel classification")
 
@@ -168,6 +169,8 @@ class TensorFlowNetwork:
 		self.multilabel = multilabel
 		self.optimize_labels = optimize_labels
 		self.verbose = verbose
+		self.accuracy_logged_every_n = accuracy_logged_every_n
+		self.print_per_task = print_per_task
 
 		print("\nBuilding training/validation/testing matrices from data dataframe...")
 		self.train_X, self.train_y = helper.getTensorFlowMatrixData(self.data_df, wanted_feats, wanted_labels, dataset='Train', single_output=(not multilabel))
@@ -522,7 +525,7 @@ class TensorFlowNetwork:
 		return preds
 
 	def get_preds_for_df(self):
-		X = self.data_df[self.wanted_feats].as_matrix()
+		X = self.data_df[self.wanted_feats].to_numpy()
 		preds = self.predict(X)
 		assert len(preds) == len(self.data_df)
 		preds_df = copy.deepcopy(self.data_df)

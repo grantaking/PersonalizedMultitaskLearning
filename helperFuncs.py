@@ -9,7 +9,8 @@ from sklearn.metrics import roc_auc_score, f1_score, precision_score, recall_sco
 import ast
 import math
 import matplotlib.pyplot as plt
-import tensorflow as tf 
+import tensorflow._api.v2.compat.v1 as tf
+tf.disable_v2_behavior()
 
 NAN_FILL_VALUE = 0
 
@@ -566,13 +567,13 @@ def fixSettingDictLoadedFromResultsDf(setting_dict):
 		if type(setting_dict['hidden_layers']) == str:
 			setting_dict['hidden_layers'] = ast.literal_eval(setting_dict['hidden_layers'])
 
-	if 'optimizer' in setting_dict.keys():
-		if 'GradientDescent' in setting_dict['optimizer']:
-			setting_dict['optimizer'] = tf.train.GradientDescentOptimizer
-		elif 'Adagrad' in setting_dict['optimizer']:
-			setting_dict['optimizer'] = tf.train.AdagradOptimizer
-		else:
-			setting_dict['optimizer'] = tf.train.AdamOptimizer
+	#if 'optimizer' in setting_dict.keys():
+	#	if 'GradientDescent' in setting_dict['optimizer']:
+	#		setting_dict['optimizer'] = tf.train.GradientDescentOptimizer
+	#	elif 'Adagrad' in setting_dict['optimizer']:
+	#		setting_dict['optimizer'] = tf.train.AdagradOptimizer
+	#	else:
+	#		setting_dict['optimizer'] = tf.train.AdamOptimizer
 
 	for setting in ['batch_size','decay_steps']:
 		if setting in setting_dict.keys():

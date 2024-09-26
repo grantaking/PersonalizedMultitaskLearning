@@ -2,7 +2,8 @@
 network."""
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+import tensorflow._api.v2.compat.v1 as tf
+tf.disable_v2_behavior()
 import sys
 import os
 import pickle
@@ -53,10 +54,10 @@ class TensorFlowSTLWrapper:
 
 		self.dataset_name = dataset_name 
 		self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
-		self.wanted_feats = [x for x in self.data_df.columns.values if x != 'user_id' and x != 'timestamp' and x!= 'dataset' and '_Label' not in x]
+		self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and '_Label' not in x]
 		if self.users_as_tasks:
 			self.wanted_labels = [target_label]
-			self.n_tasks = len(self.data_df['user_id'].unique())
+			self.n_tasks = len(self.data_df['pid'].unique())
 		else:
 			self.wanted_labels = [x for x in self.data_df.columns.values if '_Label' in x and 'tomorrow_' in x and 'Evening' in x and 'Alertness' not in x and 'Energy' not in x]
 			self.n_tasks = len(self.wanted_labels)
@@ -65,13 +66,13 @@ class TensorFlowSTLWrapper:
 		self.l2_regularizers = [1e-2, 1e-4]
 		self.dropout = [True, False]
 		self.decay = [True]
-		self.decay_steps = [10000]
+		self.decay_steps = [1000]
 		self.decay_rates = [0.95]
 		self.optimizers = [tf.train.AdamOptimizer] #[tf.train.AdagradOptimizer,  tf.train.GradientDescentOptimizer
-		self.train_steps =[4001]
+		self.train_steps =[5001]
 		self.batch_sizes = [5,10,20]
-		self.learning_rates = [.01, .001]
-		self.architectures = [[100],[50,5],[100,10]] if architectures is None else architectures
+		self.learning_rates = [.01, .001, .0001]
+		self.architectures = [[1024,256],[500,50],[1024]] if architectures is None else architectures
 
 		self.test_run = test_run
 		if test_run:
@@ -169,7 +170,7 @@ class TensorFlowSTLWrapper:
 
 	def sweepParametersForOneTask(self, task_name, target_label):
 		if self.users_as_tasks:
-			task_df = self.data_df[self.data_df['user_id'] == task_name]
+			task_df = self.data_df[self.data_df['pid'] == task_name]
 		else:
 			task_df = self.data_df
 		self.net = tfnet.TensorFlowNetwork(task_df, copy.deepcopy(self.wanted_feats), self.wanted_labels, verbose=False, val_type=self.val_type)
@@ -203,17 +204,18 @@ class TensorFlowSTLWrapper:
 											for dsteps in self.decay_steps:
 												for drate in self.decay_rates:
 													results_dict = self.testOneSettingForOneTask(hidden_layers, l2_beta, lrate, dropout, decay, dsteps, drate, bsize, opt, tsteps)
-													df = df.append(results_dict ,ignore_index=True)
+													df = pd.concat([df,pd.DataFrame([results_dict])] ,ignore_index=True)
 										else:
 											#decay steps and decay rate don't matter if decay is set to false
 											results_dict = self.testOneSettingForOneTask(hidden_layers, l2_beta, lrate, dropout, decay, 10000, 0.95, bsize, opt, tsteps)
-											df = df.append(results_dict ,ignore_index=True)
+											df = pd.concat([df,pd.DataFrame([results_dict])] ,ignore_index=True)
 		
 		accuracies = df['val_acc'].tolist()
 		max_acc = max(accuracies)
 		max_idx = accuracies.index(max_acc)
 
 		best_results_dict = df.iloc[max_idx]
+		best_results_dict['task_name'] = task_name
 
 		#retrain with the best settings
 
@@ -236,7 +238,7 @@ class TensorFlowSTLWrapper:
 
 	def getFinalResultsForTask(self, setting_dict):
 		if self.users_as_tasks:
-			task_df = self.data_df[self.data_df['user_id'] == setting_dict['task_name']]
+			task_df = self.data_df[self.data_df['pid'] == setting_dict['task_name']]
 			target_label = [self.target_label]
 		else:
 			task_df = self.data_df
@@ -291,7 +293,7 @@ class TensorFlowSTLWrapper:
 		
 		results_dict = self.sweepParametersForOneTask(task, target_label)
 		results_dict['task_name'] = task
-		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
+		self.val_results_df = pd.concat([self.val_results_df, pd.DataFrame([results_dict])],ignore_index=True)
 		
 		print("\n", self.val_results_df.tail(n=1))
 		t1 = time()
@@ -326,7 +328,7 @@ class TensorFlowSTLWrapper:
 		sys.stdout.flush()
 
 		if self.users_as_tasks:
-			tasks = self.data_df['user_id'].unique()
+			tasks = self.data_df['pid'].unique()
 		else:
 			tasks = [helper.getFriendlyLabelName(x) for x in self.wanted_labels]
 
