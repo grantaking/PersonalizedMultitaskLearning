@@ -50,7 +50,7 @@ def getDatasetCoreNameAndPath(datafile):
 	path = os.path.splitext(datafile)[0].replace(core_name, '')
 	return core_name, path
 
-def getLabelTaskListFromDataset(datafile, subdivide_phys=True):
+def getLabelTaskListFromDataset(datafile, subdivide_phone=True):
 	"""Partitions a .csv file into a task-dict-list pickle file by separating
 	related labels into the different tasks."""
 	df = pd.read_csv(datafile)
@@ -59,7 +59,7 @@ def getLabelTaskListFromDataset(datafile, subdivide_phys=True):
 
 	core_name, data_path = getDatasetCoreNameAndPath(datafile)
 
-	modality_dict = getModalityDict(wanted_feats, subdivide_phys=subdivide_phys)
+	modality_dict = getModalityDict(wanted_feats, subdivide_phone=subdivide_phone)
 	
 	for dataset in ['Train','Val','Test']:
 		task_dict_list = []
@@ -76,8 +76,8 @@ def getLabelTaskListFromDataset(datafile, subdivide_phys=True):
 			task_dict_list.append(task_dict)
 		pickle.dump(task_dict_list, open(data_path + "datasetTaskList-" + core_name + "_" + dataset + ".p","wb"))
 
-def getModalityDict(wanted_feats, subdivide_phys=False):
-	modalities = list(set([getFeatPrefix(x, subdivide_phys=subdivide_phys) for x in wanted_feats]))
+def getModalityDict(wanted_feats, subdivide_phone=True):
+	modalities = list(set([getFeatPrefix(x, subdivide_phone=subdivide_phone) for x in wanted_feats]))
 	mod_dict = dict()
 	for modality in modalities:
 		mod_dict[modality] = getStartIndex(wanted_feats, modality)
@@ -85,24 +85,26 @@ def getModalityDict(wanted_feats, subdivide_phys=False):
 
 def getStartIndex(wanted_feats, modality):
 	for i,s in enumerate(wanted_feats):
-		if modality[0:4] == 'phys' and 'H' in modality and modality != 'physTemp':
-			if modality + ':' in s:
-				return i
-		else:
-			if modality + '_' in s:
+#		if modality[0:6] == 'phone_' and 'H' in modality and modality != 'physTemp':
+#			if modality + ':' in s:
+#				return i
+#		else:
+			if modality in s:
 				return i
 
-def getFeatPrefix(feat_name, subdivide_phys=False):
-	idx = feat_name.find('_')
+def getFeatPrefix(feat_name, subdivide_phone=True):
+	idx = feat_name.find('_') + 1
 	prefix = feat_name[0:idx]
-	if not subdivide_phys or prefix != 'phys':
+	if prefix  == '':
+		prefix = feat_name
+	if not subdivide_phone or prefix != 'phone_':
 		return prefix
 	else:
-		idx = feat_name.find(':')
+		idx = feat_name.find('_',6) + 1
 		return feat_name[0:idx]
 
 def getUserTaskListFromDataset(datafile, target_label, suppress_output=False, 
-							   group_on='user_id', subdivide_phys=False):
+							   group_on='user_id', subdivide_phone=True):
 	"""Partitions a .csv file into a task-dict-list pickle file by separating
 	different individuals (users) into the different tasks."""
 	df = pd.read_csv(datafile)
@@ -114,7 +116,7 @@ def getUserTaskListFromDataset(datafile, target_label, suppress_output=False,
 	dataset_name, datapath = getDatasetCoreNameAndPath(datafile)
 	label_name = helper.getFriendlyLabelName(target_label)
 	
-	modality_dict = getModalityDict(wanted_feats, subdivide_phys=subdivide_phys)
+	modality_dict = getModalityDict(wanted_feats, subdivide_phone=subdivide_phone)
 
 	train_task_dict_list = []
 	val_task_dict_list = []
