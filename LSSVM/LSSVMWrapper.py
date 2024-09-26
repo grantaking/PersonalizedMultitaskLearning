@@ -109,6 +109,8 @@ class LSSVMWrapper(STLWrapper):
 					self.list_of_param_settings.remove(setting)
 					continue
 			i += 1
+		self.num_settings = len(self.list_of_param_settings) * self.n_tasks
+		
 	
 if __name__ == "__main__":
 	print("LSSVM MODEL SELECTION")

@@ -61,7 +61,7 @@ class LSSVM:
 		b_vec = np.vstack([0,np.ones((N,1))])
 
 		try:
-			params,residuals, rank,s = np.linalg.lstsq(A,b_vec)
+			params,residuals, rank,s = np.linalg.lstsq(A,b_vec, rcond=None)
 		except:
 			print("\n------WARNING!!!  These parameters didn't converge!------\n")
 			return False
