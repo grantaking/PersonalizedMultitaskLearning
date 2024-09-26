@@ -12,7 +12,7 @@ Multi-task and multi-view learning of user state. Neurocomputing, 139, 97-106.
 import numpy as np
 import scipy.optimize as opt
 import scipy.linalg as la
-from scipy import interp
+#from scipy import interp
 import math
 
 from sklearn.metrics import roc_curve, auc
@@ -33,7 +33,7 @@ import importlib
 
 from scipy.optimize import minimize
 
-CODE_PATH = os.path.dirname(os.getcwd())
+CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 
 import helperFuncs as helper
@@ -437,7 +437,7 @@ class MTMKL:
 			probas_ = self.classifiers[t].fit(X_t, Y_t).predict_proba(X_test_t)
 			fpr, tpr, thresholds = roc_curve(Y_test_t, probas_[:, 1])
 
-			mean_tpr += interp(mean_fpr, fpr, tpr)
+			mean_tpr += np.interp(mean_fpr, fpr, tpr)
 			mean_tpr[0] = 0.0
 
 		mean_tpr /= self.n_tasks

@@ -10,7 +10,7 @@ import math
 from sklearn.svm import SVC
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics.pairwise import rbf_kernel
-from scipy import interp
+#from scipy import interp
 import pandas as pd
 import sys
 import os
@@ -96,7 +96,7 @@ class MTMKLWrapper:
 		self.n_tasks = len(self.test_tasks)
 
 		if optimize_labels is None:
-			self.optimize_labels = ['tomorrow_Group_Happiness_Evening_Label', 'tomorrow_Group_Health_Evening_Label', 'tomorrow_Group_Calmness_Evening_Label']
+			self.optimize_labels = ['drink_TF_Label']
 		else:
 			self.optimize_labels = optimize_labels
 
