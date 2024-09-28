@@ -332,7 +332,7 @@ class MTMKLWrapper:
 		else:
 			results_dict = self.getValidationResults(results_dict, C, beta, kernel, v, regularizer)
 		
-		self.val_results_df = self.val_results_df.append(results_dict,ignore_index=True)
+		self.val_results_df = pd.concat([self.val_results_df,pd.DataFrame([results_dict])],ignore_index=True)
 		
 		print("\n", self.val_results_df.tail(n=1))
 		t1 = time()
