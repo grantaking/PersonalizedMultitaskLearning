@@ -6,6 +6,7 @@ import tensorflow._api.v2.compat.v1 as tf
 tf.disable_v2_behavior()
 import sys
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 import pickle
 import copy
 from time import time
@@ -35,7 +36,7 @@ class TensorFlowSTLWrapper:
 	def __init__(self, dataset_name, target_label, users_as_tasks=True, test_steps=9001, val_output_file=None, 
 				val_type=DEFAULT_VAL_TYPE, cont=False, results_path=DEFAULT_RESULTS_PATH, 
 				datasets_path=DEFAULT_DATASETS_PATH, figures_path=DEFAULT_FIGURES_PATH, architectures=None, 
-				num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, test_run=False, redo_test=False):
+				num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, test_run=True, redo_test=False):
 		self.datasets_path = datasets_path
 		self.cont = cont
 		self.val_type = val_type
@@ -214,7 +215,7 @@ class TensorFlowSTLWrapper:
 		max_acc = max(accuracies)
 		max_idx = accuracies.index(max_acc)
 
-		best_results_dict = df.iloc[max_idx]
+		best_results_dict = df.iloc[max_idx].copy()
 		best_results_dict['task_name'] = task_name
 
 		#retrain with the best settings

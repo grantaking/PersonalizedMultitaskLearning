@@ -392,7 +392,7 @@ class TensorFlowNetwork:
 						
 						if i < len(self.weights)-1:
 							hidden = tf.nn.relu(hidden)
-							hidden = tf.nn.dropout(hidden, self.dropout_keep_prob)  
+							hidden = tf.nn.dropout(hidden, rate = 1- self.dropout_keep_prob)  
 				return hidden
 
 			# Training computation

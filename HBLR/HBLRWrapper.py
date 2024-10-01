@@ -86,7 +86,7 @@ class HBLRWrapper:
 
 		#parameters that can be tuned
 		self.tau10s=[10, 1, 0.05, 0.01]
-		self.tau20s=[1.0, 0.05, 0.01]
+		self.tau20s=[1.0, 0.1, 0.01]
 		self.sigma_multipliers = [.01,0.1, 1]
 		self.mu_multipliers = [0.0]
 
@@ -367,7 +367,7 @@ class HBLRWrapper:
 						self.testOneSetting(tau10, tau20, sigma_mult, mu_mult)
 		self.val_results_df.to_csv(self.results_path + self.save_prefix + '.csv')
 
-	def findBestSetting(self, save_final_results=False):
+	def findBestSetting(self, save_final_results=True):
 		accuracies = self.val_results_df['val_acc'].tolist()
 		max_acc = max(accuracies)
 		max_idx = accuracies.index(max_acc)
@@ -470,7 +470,7 @@ class HBLRWrapper:
 			print("Uh oh, the test csv filename was not set, can't save test preds")
 
 		print("\t SAVING CLASSIFIER")
-		with open(self.results_path + "PickledModel-" + self.save_prefix + '.p',"w") as f:
+		with open(self.results_path + "PickledModel-" + self.save_prefix + '.p',"wb") as f:
 			pickle.dump(self.classifier,f)
 
 	def saveHintonPlot(self, matrix, num_tests, max_weight=None, ax=None):
