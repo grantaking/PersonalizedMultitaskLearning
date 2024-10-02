@@ -40,7 +40,7 @@ parser.add_argument('--target_label', type=str,
 					help="Outcome label to predict for each user in "
 						 "users-as-tasks")
 parser.add_argument('--group_users_on', type=str, 
-					default='user_id',
+					default='pid',
 					help="Name of column that indicates user or cluster ID "
 						 "for partitioning users into tasks.")
 
