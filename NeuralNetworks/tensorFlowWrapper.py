@@ -4,6 +4,7 @@ import tensorflow._api.v2.compat.v1 as tf
 tf.disable_v2_behavior()
 import sys
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 import pickle
 from time import time
 import importlib
@@ -35,7 +36,7 @@ class TensorFlowWrapper:
 	def __init__(self, dataset_name, target_label=TARGET_LABEL, trial_name=None, multilabel=False, multitask=False, 
 				 print_per_task=False, test_steps=9001, results_path=DEFAULT_RESULTS_PATH, 
 				 datasets_path=DEFAULT_DATASETS_PATH, figures_path=DEFAULT_FIGURES_PATH, val_output_file=None, 
-				 val_type=DEFAULT_VAL_TYPE, cont=False, architectures=None, test_csv_filename=None):
+				 val_type=DEFAULT_VAL_TYPE, cont=False, architectures=None, test_csv_filename=None, test_run = False):
 		assert not(multilabel and multitask)
 
 		self.multilabel = multilabel
@@ -84,21 +85,33 @@ class TensorFlowWrapper:
 											multilabel=self.multilabel, verbose=False, val_type=self.val_type, print_per_task=print_per_task)
 
 		#parameters that can be tuned:
-		self.l2_regularizers = [1e-2, 1e-4]
-		self.dropout = [True, False]
-		self.decay = [True]
-		self.decay_steps = [1000]
-		self.decay_rates = [0.95]
-		self.optimizers = [tf.train.AdamOptimizer] #[tf.train.AdagradOptimizer,  tf.train.GradientDescentOptimizer
-		self.train_steps =[5001]
-		if multitask:
-			self.batch_sizes = [20]
-			self.learning_rates = [.01, .001, .0001]
-			self.architectures = [[500,50],[300,20,10]] if architectures is None else architectures
+		if test_run == True:
+			self.l2_regularizers = [1e-4]
+			self.dropout = [True]
+			self.decay = [True]
+			self.decay_steps = [1000]
+			self.decay_rates = [0.95]
+			self.optimizers = [tf.train.AdamOptimizer] #[tf.train.AdagradOptimizer,  tf.train.GradientDescentOptimizer
+			self.train_steps =[5001]
+			self.batch_sizes = [50]
+			self.learning_rates = [.01]
+			self.architectures = [[500]] if architectures is None else architectures
 		else:
-			self.batch_sizes = [50,75]
-			self.learning_rates = [.01, .001, .0001]
-			self.architectures = [[1024,256],[500,50],[1024]] if architectures is None else architectures
+			self.l2_regularizers = [1e-2, 1e-4]
+			self.dropout = [True, False]
+			self.decay = [True]
+			self.decay_steps = [1000]
+			self.decay_rates = [0.95]
+			self.optimizers = [tf.train.AdamOptimizer] #[tf.train.AdagradOptimizer,  tf.train.GradientDescentOptimizer
+			self.train_steps =[5001]
+			if multitask:
+				self.batch_sizes = [20]
+				self.learning_rates = [.01, .001, .0001]
+				self.architectures = [[500,50],[300,20,10]] if architectures is None else architectures
+			else:
+				self.batch_sizes = [50,75]
+				self.learning_rates = [.01, .001, .0001]
+				self.architectures = [[1024,256],[500,50],[1024]] if architectures is None else architectures
 
 		#storing the results
 		self.time_sum = 0
@@ -320,6 +333,7 @@ class TensorFlowWrapper:
 		else:
 			self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '.eps')
 			self.net.plotValResults(save_path=self.figures_path + self.val_output_prefix + '.png')
+			print("Final Accuracy:", self.net.training_val_results['acc'][-1])
 			print("Final AUC:", self.net.training_val_results['auc'][-1])
 
 		if self.test_csv_filename is not None:
@@ -330,7 +344,7 @@ class TensorFlowWrapper:
 					task_column = 'Big5GenderKMeansCluster'
 					tasks_are_ints = True
 				
-				if 'User' in self.dataset_name:
+				if 'pid' in self.dataset_name:
 					print("Guessing the task column is user_id - if this is incorrect expect errors")
 					task_column = 'pid'
 					tasks_are_ints = False

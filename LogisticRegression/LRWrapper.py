@@ -10,6 +10,10 @@ from time import time
 from sklearn.metrics.pairwise import rbf_kernel
 import importlib
 
+import warnings
+from sklearn.exceptions import DataConversionWarning
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
+
 CODE_PATH = os.getcwd()
 sys.path.append(CODE_PATH)
 
@@ -47,7 +51,7 @@ class LRWrapper(STLWrapper):
 		
 		STLWrapper.__init__(self, file_prefix, users_as_tasks=users_as_tasks, cont=cont, 
 				classifier_name='LR', num_cross_folds=num_cross_folds, #dropbox_path=dropbox_path, 
-				datasets_path=datasets_path, cant_train_with_one_class=False, 
+				datasets_path=datasets_path, cant_train_with_one_class=True, 
 				save_results_every_nth=SAVE_RESULTS_EVERY_X_TESTS, test_csv_filename=test_csv_filename)
 
 		self.models = [None] * self.n_tasks
