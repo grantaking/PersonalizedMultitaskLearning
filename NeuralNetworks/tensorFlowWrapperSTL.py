@@ -36,7 +36,7 @@ class TensorFlowSTLWrapper:
 	def __init__(self, dataset_name, target_label, users_as_tasks=True, test_steps=9001, val_output_file=None, 
 				val_type=DEFAULT_VAL_TYPE, cont=False, results_path=DEFAULT_RESULTS_PATH, 
 				datasets_path=DEFAULT_DATASETS_PATH, figures_path=DEFAULT_FIGURES_PATH, architectures=None, 
-				num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, test_run=True, redo_test=False):
+				num_cross_folds=DEFAULT_NUM_CROSS_FOLDS, test_run=False, redo_test=False):
 		self.datasets_path = datasets_path
 		self.cont = cont
 		self.val_type = val_type
@@ -55,7 +55,7 @@ class TensorFlowSTLWrapper:
 
 		self.dataset_name = dataset_name 
 		self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
-		self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and '_Label' not in x]
+		self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and x!= 'Cluster' and '_Label' not in x]
 		if self.users_as_tasks:
 			self.wanted_labels = [target_label]
 			self.n_tasks = len(self.data_df['pid'].unique())
@@ -87,7 +87,7 @@ class TensorFlowSTLWrapper:
 			self.train_steps =[1001]
 			self.batch_sizes = [10]
 			self.learning_rates = [.001]
-			self.architectures = [[100],[50,5]] if architectures is None else architectures
+			self.architectures = [[100]] if architectures is None else architectures
 
 		self.calcNumSettingsDesired()
 
@@ -222,7 +222,7 @@ class TensorFlowSTLWrapper:
 
 		test_acc, test_auc, test_preds = self.getFinalResultsForTask(best_results_dict)
 		self.cumulative_test_preds.extend(test_preds)
-		self.cumulative_test_true.extend(self.net.test_X)
+		self.cumulative_test_true.extend(np.argmax(self.net.test_y, axis=1))
 
 		best_results_dict['test_acc'] = test_acc
 		best_results_dict['test_auc'] = test_auc
@@ -252,6 +252,7 @@ class TensorFlowSTLWrapper:
 
 		self.net.setUpGraph()
 		preds = self.net.runGraph(self.test_steps, print_test=True, return_test_preds=True)
+		preds = np.argmax(preds, axis=1)
 
 		preds_df = self.net.get_preds_for_df()
 		label_name = setting_dict['task_name']
