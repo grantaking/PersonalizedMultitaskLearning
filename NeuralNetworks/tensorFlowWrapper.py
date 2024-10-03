@@ -73,7 +73,7 @@ class TensorFlowWrapper:
 			self.wanted_labels = self.net.optimize_labels
 		else:
 			self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
-			self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and '_Label' not in x]
+			self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and x!= 'Cluster' and '_Label' not in x]
 			if self.multilabel:
 				self.wanted_labels = [x for x in self.data_df.columns.values if '_Label' in x and 'tomorrow_' in x and 'Evening' in x and 'Alertness' not in x and 'Energy' not in x]
 				self.optimize_labels = [x for x in self.wanted_labels if 'tomorrow_' in x and 'Evening_' in x]
@@ -95,7 +95,7 @@ class TensorFlowWrapper:
 			self.train_steps =[5001]
 			self.batch_sizes = [50]
 			self.learning_rates = [.01]
-			self.architectures = [[500]] if architectures is None else architectures
+			self.architectures = [[500, 50]] if architectures is None else architectures
 		else:
 			self.l2_regularizers = [1e-2, 1e-4]
 			self.dropout = [True, False]
@@ -341,7 +341,7 @@ class TensorFlowWrapper:
 				task_column = None
 				if 'Cluster' in self.dataset_name:
 					print("Guessing the task column is Big5GenderKMeansCluster - if this is incorrect expect errors")
-					task_column = 'Big5GenderKMeansCluster'
+					task_column = 'Cluster'
 					tasks_are_ints = True
 				
 				if 'pid' in self.dataset_name:
@@ -401,17 +401,20 @@ if __name__ == "__main__":
 		multilabel = True
 		print("Performing multi-task classification, in which the same net is shared by all tasks")
 		print("Optimizing for accuracy on tomorrow evening")
+		print_per_task=True
 	elif sys.argv[2] == 'multitask':
 		multitask = True
 		print("Performing multi-task classification, in which each task gets it's own private final hidden layer")
+		print_per_task=False
 	else:
 		target_label = sys.argv[2]
 		print("Performing single-task classification, classifying on", target_label)
+		print_per_task=False
 
-	if sys.argv[3] == 'wellbeing':
-		print_per_task = True
-	else:
-		print_per_task = False
+	#if sys.argv[3] == 'drink_TF_Label':
+	#	print_per_task = True
+	#else:
+	#	print_per_task = False
 
 	if len(sys.argv) >= 5 and sys.argv[4] == 'True':
 		cont = True
