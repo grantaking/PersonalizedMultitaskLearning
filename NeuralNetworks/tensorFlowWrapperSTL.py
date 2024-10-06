@@ -55,10 +55,11 @@ class TensorFlowSTLWrapper:
 
 		self.dataset_name = dataset_name 
 		self.data_df = pd.read_csv(self.datasets_path + self.dataset_name)
+		self.data_df.drop('Unnamed: 0', axis=1, inplace=True)
 		self.wanted_feats = [x for x in self.data_df.columns.values if x != 'pid' and x != 'date' and x!= 'dataset' and x!= 'Cluster' and '_Label' not in x]
 		if self.users_as_tasks:
 			self.wanted_labels = [target_label]
-			self.n_tasks = len(self.data_df['pid'].unique())
+			self.n_tasks = len(self.data_df['Cluster'].unique())
 		else:
 			self.wanted_labels = [x for x in self.data_df.columns.values if '_Label' in x and 'tomorrow_' in x and 'Evening' in x and 'Alertness' not in x and 'Energy' not in x]
 			self.n_tasks = len(self.wanted_labels)
@@ -71,7 +72,7 @@ class TensorFlowSTLWrapper:
 		self.decay_rates = [0.95]
 		self.optimizers = [tf.train.AdamOptimizer] #[tf.train.AdagradOptimizer,  tf.train.GradientDescentOptimizer
 		self.train_steps =[5001]
-		self.batch_sizes = [5,10,20]
+		self.batch_sizes = [20]
 		self.learning_rates = [.01, .001, .0001]
 		self.architectures = [[1024,256],[500,50],[1024]] if architectures is None else architectures
 
@@ -171,10 +172,10 @@ class TensorFlowSTLWrapper:
 
 	def sweepParametersForOneTask(self, task_name, target_label):
 		if self.users_as_tasks:
-			task_df = self.data_df[self.data_df['pid'] == task_name]
+			task_df = self.data_df[self.data_df['Cluster'] == task_name]
 		else:
 			task_df = self.data_df
-		self.net = tfnet.TensorFlowNetwork(task_df, copy.deepcopy(self.wanted_feats), self.wanted_labels, verbose=False, val_type=self.val_type)
+		self.net = tfnet.TensorFlowNetwork(task_df, copy.deepcopy(self.wanted_feats), self.wanted_labels, verbose=True, val_type=self.val_type)
 
 		if len(self.net.train_X) == 0 or len(self.net.train_y) == 0:
 			print("No training data for this task!")
@@ -239,12 +240,12 @@ class TensorFlowSTLWrapper:
 
 	def getFinalResultsForTask(self, setting_dict):
 		if self.users_as_tasks:
-			task_df = self.data_df[self.data_df['pid'] == setting_dict['task_name']]
+			task_df = self.data_df[self.data_df['Cluster'] == setting_dict['task_name']]
 			target_label = [self.target_label]
 		else:
 			task_df = self.data_df
 			target_label = [helper.getOfficialLabelName(setting_dict['task_name'])]
-		self.net = tfnet.TensorFlowNetwork(task_df, copy.deepcopy(self.wanted_feats),target_label, verbose=False, val_type=self.val_type)
+		self.net = tfnet.TensorFlowNetwork(task_df, copy.deepcopy(self.wanted_feats),target_label, verbose=True, val_type=self.val_type)
 		self.net.setParams(l2_beta=setting_dict['l2_beta'], initial_learning_rate=setting_dict['learning_rate'], decay=setting_dict['decay'], 
 							decay_steps=setting_dict['decay_steps'], decay_rate=setting_dict['decay_rate'], batch_size=setting_dict['batch_size'],
 							optimizer=setting_dict['optimizer'], dropout=setting_dict['dropout'])
@@ -255,7 +256,7 @@ class TensorFlowSTLWrapper:
 		preds = np.argmax(preds, axis=1)
 
 		preds_df = self.net.get_preds_for_df()
-		label_name = setting_dict['task_name']
+		label_name = str(setting_dict['task_name'])
 		preds_df.to_csv(self.results_path + "Preds-" + self.save_prefix + label_name + '.csv')
 		print("Preds df saved to", self.results_path + "Preds-" + self.save_prefix + label_name + '.csv')
 
@@ -330,7 +331,7 @@ class TensorFlowSTLWrapper:
 		sys.stdout.flush()
 
 		if self.users_as_tasks:
-			tasks = self.data_df['pid'].unique()
+			tasks = self.data_df['Cluster'].unique()
 		else:
 			tasks = [helper.getFriendlyLabelName(x) for x in self.wanted_labels]
 

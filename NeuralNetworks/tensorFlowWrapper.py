@@ -109,7 +109,7 @@ class TensorFlowWrapper:
 				self.learning_rates = [.01, .001, .0001]
 				self.architectures = [[500,50],[300,20,10]] if architectures is None else architectures
 			else:
-				self.batch_sizes = [50,75]
+				self.batch_sizes = [20]
 				self.learning_rates = [.01, .001, .0001]
 				self.architectures = [[1024,256],[500,50],[1024]] if architectures is None else architectures
 
